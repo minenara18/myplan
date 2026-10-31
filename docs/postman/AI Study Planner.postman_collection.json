@@ -1,0 +1,139 @@
+{
+  "info": {
+    "name": "AI Study Planner",
+    "description": "Koleksi Postman API perencana belajar. Semua endpoint (kecuali register/login) memakai Bearer token: daftar/masuk dulu, token bentuk `data.token`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://127.0.0.1:8000/api" },
+    { "key": "token", "value": "" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "1 Daftar",
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "POST",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "url": { "raw": "{{base_url}}/auth/register", "host": ["{{base_url}}"], "path": ["auth", "register"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Demo\",\n  \"email\": \"demo@example.com\",\n  \"password\": \"password\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const body = pm.response.json();",
+              "pm.collectionVariables.set('token', body.data.token);",
+              "pm.test('token tersimpan', () => { pm.expect(body.data.token).to.be.a('string'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2 Masuk",
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "POST",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"demo@example.com\",\n  \"password\": \"password\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const body = pm.response.json();",
+              "pm.collectionVariables.set('token', body.data.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3 Buat mata kuliah",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "url": { "raw": "{{base_url}}/courses", "host": ["{{base_url}}"], "path": ["courses"] },
+        "body": { "mode": "raw", "raw": "{\n  \"nama\": \"Kecerdasan Buatan\"\n}" }
+      }
+    },
+    {
+      "name": "4 Buat tugas",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "url": { "raw": "{{base_url}}/tasks", "host": ["{{base_url}}"], "path": ["tasks"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"course_id\": 1,\n  \"judul\": \"Tugas Chatbot\",\n  \"tenggat\": \"2026-11-05T17:00:00+00:00\",\n  \"estimasi_menit\": 120,\n  \"prioritas\": \"tinggi\",\n  \"status\": \"belum\"\n}"
+        }
+      }
+    },
+    {
+      "name": "5 Susun rencana AI (rate limit 5/menit)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "url": { "raw": "{{base_url}}/ai/plan", "host": ["{{base_url}}"], "path": ["ai", "plan"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"mulai\": \"2026-11-02\",\n  \"sampai\": \"2026-11-08\",\n  \"jam_mulai\": 16,\n  \"jam_selesai\": 21\n}"
+        }
+      }
+    },
+    {
+      "name": "6 Terapkan rencana (bulk sesi)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "url": { "raw": "{{base_url}}/sessions/bulk", "host": ["{{base_url}}"], "path": ["sessions", "bulk"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"sesi\": [\n    {\n      \"task_id\": 1,\n      \"course_id\": 1,\n      \"mulai\": \"2026-11-02T16:00:00+00:00\",\n      \"selesai\": \"2026-11-02T17:00:00+00:00\",\n      \"sumber\": \"ai\"\n    }\n  ]\n}"
+        }
+      }
+    },
+    {
+      "name": "7 Ringkas materi (rate limit 10/menit)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "url": { "raw": "{{base_url}}/ai/summarize", "host": ["{{base_url}}"], "path": ["ai", "summarize"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"teks\": \"Basis data adalah kumpulan data terorganisir yang dikelola sistem manajemen basis data. Model relasional menyimpan data dalam tabel dengan baris dan kolom. Normalisasi mengurangi redundansi dengan memisahkan data ke tabel dengan kunci asing.\"\n}"
+        }
+      }
+    },
+    {
+      "name": "8 Daftar sesi",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "url": { "raw": "{{base_url}}/sessions", "host": ["{{base_url}}"], "path": ["sessions"] }
+      }
+    },
+    {
+      "name": "9 Keluar",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "url": { "raw": "{{base_url}}/auth/logout", "host": ["{{base_url}}"], "path": ["auth", "logout"] }
+      }
+    }
+  ]
+}

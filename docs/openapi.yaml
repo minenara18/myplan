@@ -1,0 +1,407 @@
+openapi: 3.0.3
+info:
+  title: AI Study Planner API
+  description: API Laravel 12 + Sanctum untuk aplikasi perencana belajar mahasiswa. Semua respons dibungkus {"data": ...}; kesalahan seragam {message, errors, code}. Kode kegagalan: VALIDASI_GAGAL, TIDAK_TERAUTENTIKASI, OTORISASI_GAGAL, TIDAK_ADA, KESALAHAN_SERVER, AI_GAGAL (502).
+  version: 1.0.0
+servers:
+  - url: http://10.0.2.2:8000/api
+    description: Emulator Android (host mesin)
+  - url: http://127.0.0.1:8000/api
+    description: Lokal
+security:
+  - bearerAuth: []
+paths:
+  /auth/register:
+    post:
+      summary: Daftar akun baru
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password]
+              properties:
+                name: { type: string }
+                email: { type: string, format: email }
+                password: { type: string, minLength: 8 }
+      responses:
+        '201':
+          description: Terdaftar
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthEnvelope' }
+        '422': { $ref: '#/components/responses/ValidasiGagal' }
+  /auth/login:
+    post:
+      summary: Masuk
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Kredensial' }
+      responses:
+        '200':
+          description: Berhasil
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthEnvelope' }
+        '401': { $ref: '#/components/responses/TidakTerautentikasi' }
+  /auth/logout:
+    post:
+      summary: Keluar (token dicabut)
+      responses:
+        '200': { description: 'Berhasil keluar' }
+  /me:
+    get:
+      summary: Profil pengguna aktif
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id: { type: string }
+                      name: { type: string }
+                      email: { type: string, format: email }
+  /settings:
+    get:
+      summary: Pengaturan pengguna
+      responses:
+        '200': { description: OK }
+    put:
+      summary: Perbarui pengaturan
+      responses:
+        '200': { description: OK }
+  /stats/weekly:
+    get:
+      summary: Statistik belajar mingguan
+      responses:
+        '200': { description: OK }
+  /courses:
+    get:
+      summary: Daftar mata kuliah milik pengguna
+      responses:
+        '200': { description: OK }
+    post:
+      summary: Buat mata kuliah
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nama]
+              properties:
+                nama: { type: string }
+                warna_index: { type: integer }
+      responses:
+        '201': { description: Dibuat }
+  /courses/{course}:
+    get:
+      summary: Detail mata kuliah
+      parameters: [{ $ref: '#/components/parameters/IdPath' }]
+      responses:
+        '200': { description: OK }
+        '404': { $ref: '#/components/responses/TidakAda' }
+    put:
+      summary: Perbarui mata kuliah
+      parameters: [{ $ref: '#/components/parameters/IdPath' }]
+      responses:
+        '200': { description: OK }
+    delete:
+      summary: Hapus mata kuliah
+      parameters: [{ $ref: '#/components/parameters/IdPath' }]
+      responses:
+        '204': { description: 'Tanpa isi' }
+  /tasks:
+    get:
+      summary: Daftar tugas
+      responses:
+        '200': { description: OK }
+    post:
+      summary: Buat tugas
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TugasInput' }
+      responses:
+        '201': { description: Dibuat }
+  /tasks/{task}:
+    get:
+      summary: Detail tugas
+      parameters: [{ $ref: '#/components/parameters/IdPath' }]
+      responses:
+        '200': { description: OK }
+        '404': { $ref: '#/components/responses/TidakAda' }
+    put:
+      summary: Perbarui tugas
+      parameters: [{ $ref: '#/components/parameters/IdPath' }]
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TugasInput' }
+      responses:
+        '200': { description: OK }
+    delete:
+      summary: Hapus tugas
+      parameters: [{ $ref: '#/components/parameters/IdPath' }]
+      responses:
+        '204': { description: 'Tanpa isi' }
+  /sessions:
+    get:
+      summary: Daftar sesi studi (filter course_id, mulai, sampai)
+      parameters:
+        - { name: course_id, in: query, schema: { type: integer } }
+        - { name: mulai, in: query, schema: { type: string, format: date } }
+        - { name: sampai, in: query, schema: { type: string, format: date } }
+      responses:
+        '200': { description: OK }
+    post:
+      summary: Buat satu sesi studi
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SesiInput' }
+      responses:
+        '201': { description: Dibuat }
+  /sessions/bulk:
+    post:
+      summary: Simpan banyak sesi sekaligus (dipakai tombol Terapkan dari AI)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sesi]
+              properties:
+                sesi:
+                  type: array
+                  minItems: 1
+                  maxItems: 50
+                  items: { $ref: '#/components/schemas/SesiInput' }
+      responses:
+        '201': { description: Dibuat }
+        '422': { $ref: '#/components/responses/ValidasiGagal' }
+  /sessions/{session}:
+    get:
+      summary: Detail sesi
+      parameters: [{ $ref: '#/components/parameters/IdPath' }]
+      responses:
+        '200': { description: OK }
+    put:
+      summary: Perbarui sesi
+      parameters: [{ $ref: '#/components/parameters/IdPath' }]
+      responses:
+        '200': { description: OK }
+    delete:
+      summary: Hapus sesi
+      parameters: [{ $ref: '#/components/parameters/IdPath' }]
+      responses:
+        '204': { description: 'Tanpa isi' }
+  /focus-records:
+    get:
+      summary: Daftar rekaman fokus
+      responses:
+        '200': { description: OK }
+    post:
+      summary: Simpan rekaman fokus
+      responses:
+        '201': { description: Dibuat }
+  /focus-records/{record}:
+    delete:
+      summary: Hapus rekaman fokus
+      parameters: [{ $ref: '#/components/parameters/IdPath' }]
+      responses:
+        '204': { description: 'Tanpa isi' }
+  /ai/plan:
+    post:
+      summary: Susun rencana belajar (LLM dengan fallback deterministik)
+      description: |
+        Rate limit 5 panggilan/menit. Prompt dibangun di server; keluaran LLM
+        divalidasi ketat (kepemilikan tugas, bentrokan, jendela waktu luang,
+        tenggat) dan blok tidak valid dibuang. LLM gagal → penjadwal
+        deterministik (sumber "fallback"). Setiap panggilan dicatat ke ai_plans.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [mulai, sampai]
+              properties:
+                mulai: { type: string, format: date, example: '2026-10-31' }
+                sampai: { type: string, format: date, example: '2026-11-06' }
+                jam_mulai: { type: integer, minimum: 0, maximum: 22, example: 16, default: 16 }
+                jam_selesai: { type: integer, minimum: 1, maximum: 24, example: 21, default: 21 }
+      responses:
+        '200':
+          description: OK — rencana siap diterapkan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      sumber:
+                        type: string
+                        enum: [ai, fallback]
+                      rentang:
+                        type: object
+                        properties:
+                          mulai: { type: string, format: date }
+                          sampai: { type: string, format: date }
+                      sesi:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            task_id: { type: string }
+                            mulai: { type: string, format: date-time }
+                            selesai: { type: string, format: date-time }
+                            alasan: { type: string, maxLength: 200 }
+                      prioritas:
+                        type: array
+                        items: { type: string }
+        '401': { $ref: '#/components/responses/TidakTerautentikasi' }
+        '422': { $ref: '#/components/responses/ValidasiGagal' }
+        '429':
+          description: Melebihi 5 panggilan/menit
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CarafulError' }
+        '502':
+          description: LLM gagal dan fallback kosong
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CarafulError' }
+  /ai/summarize:
+    post:
+      summary: Ringkas materi kuliah
+      description: Rate limit 10 panggilan/menit. Keluaran {ringkasan, poin_kunci, pertanyaan_latihan} divalidasi server; tidak ada data setengah matang.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [teks]
+              properties:
+                teks:
+                  type: string
+                  minLength: 50
+                  maxLength: 20000
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      ringkasan: { type: string }
+                      poin_kunci:
+                        type: array
+                        items: { type: string }
+                      pertanyaan_latihan:
+                        type: array
+                        items: { type: string }
+        '401': { $ref: '#/components/responses/TidakTerautentikasi' }
+        '422': { $ref: '#/components/responses/ValidasiGagal' }
+        '502':
+          description: LLM gagal atau keluaran tidak sesuai skema
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CarafulError' }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  parameters:
+    IdPath:
+      name: id
+      in: path
+      required: true
+      schema: { type: string }
+  responses:
+    ValidasiGagal:
+      description: 'Validasi gagal (422)'
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/CarafulError' }
+    TidakTerautentikasi:
+      description: 'Belum masuk (401)'
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/CarafulError' }
+    TidakAda:
+      description: 'Tidak ditemukan (404)'
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/CarafulError' }
+  schemas:
+    Kredensial:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string }
+    AuthEnvelope:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            token: { type: string }
+            user:
+              type: object
+              properties:
+                id: { type: string }
+                name: { type: string }
+                email: { type: string, format: email }
+    TugasInput:
+      type: object
+      required: [course_id, judul, tenggat, estimasi_menit, prioritas]
+      properties:
+        course_id: { type: string }
+        judul: { type: string }
+        catatan: { type: string }
+        tenggat: { type: string, format: date-time }
+        estimasi_menit: { type: integer, minimum: 1 }
+        prioritas: { type: string, enum: [tinggi, sedang, rendah] }
+        status: { type: string, enum: [belum, berjalan, selesai] }
+    SesiInput:
+      type: object
+      required: [course_id, mulai, selesai]
+      properties:
+        course_id: { type: string }
+        task_id: { type: string, nullable: true }
+        mulai: { type: string, format: date-time }
+        selesai: { type: string, format: date-time }
+        sumber: { type: string, enum: [manual, ai] }
+    CarafulError:
+      type: object
+      properties:
+        message: { type: string }
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items: { type: string }
+        code: { type: string }
