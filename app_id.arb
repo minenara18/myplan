@@ -1,0 +1,17 @@
+{
+  "$Welcome": "Selamat Datang",
+  "$Home": "Beranda",
+  "$Calendar": "Kalender",
+  "$AI": "AI",
+  "$Graphics": "Grafik",
+  "$Profile": "Profil",
+  "$Priority": "Prioritas",
+  "$Subject": "Mata Pelajaran",
+  "$Status": "Status",
+  "$Login": "Masuk",
+  "$Register": "Daftar",
+  "$Logout": "Keluar",
+  "$StudyPlan": "Rencana Belajar",
+  "$AddTask": "Tambah Tugas",
+  "$Settings": "Pengaturan"
+}

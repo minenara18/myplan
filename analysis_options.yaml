@@ -1,0 +1,5 @@
+name: very_good_analysis
+
+linter:
+  rules:
+    - always_use_package_imports

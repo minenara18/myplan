@@ -1,0 +1,42 @@
+name: ai_study_planner
+description: AI Study Planner - Aplikasi perencana belajar mahasiswa
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.5.1
+  go_router: ^14.2.0
+  dio: ^5.4.0
+  fl_chart: ^0.68.0
+  intl: ^0.20.0
+  clock: ^1.0.0
+  shared_preferences: ^2.2.2
+  flutter_secure_storage: ^9.2.2
+  flutter_localizations:
+    sdk: flutter
+  equatable: ^2.0.5
+
+dev_dependencies:
+  very_good_analysis: ^5.1.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+  # fonts
+  fonts:
+    - family: DM Serif Display
+      fonts:
+        - asset: assets/fonts/dm_serif_display/DMSerifDisplay-Regular.ttf
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/inter/Inter-Regular.ttf
+
+  assets:
+    - assets/circles/

@@ -1,0 +1,6 @@
+arb-directories:
+  - lib/l10n
+main arb: app_id.arb
+output: .arb
+source: arb
+output-localization-directories: []
