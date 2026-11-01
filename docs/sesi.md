@@ -51,8 +51,17 @@ Yang perlu dipastikan saat rilis:
   dan `ios/Runner/Assets.xcassets/AppIcon.appiconset/` saat ini juga berasal
   dari logo placeholder.
 
-## Rencana Fase E (belum dikerjakan di tahap ini)
+- `l10n.yaml` dihapus. Ia tidak pernah dipakai oleh codegen Flutter (key
+  `main arb`/`arb-directories` bukan opsi valid `flutter gen-l10n`, dan
+  file ARB berada di root, bukan di `lib/l10n/directory` yang ia tunjuk).
+  L10n riil memakai dictionary hand-written di `lib/l10n/app_localizations.dart`
+  dengan `app_id.arb` di root sebagai daftar kunci/terjemahan. Kehadiran
+  `l10n.yaml` tanpa `flutter: generate: true` memicu kegagalan
+  `gen_localizations` pada `flutter build apk`. Bila kelak ingin memakai
+  codegen resmi, tambahkan `generate: true` di pubspec dan tulis ulang
+  `l10n.yaml` dengan opsi valid (arb-dir: lib/l10n, template-arb-file: app_id.arb).
 
+## Rencana Fase E (belum dikerjakan di tahap ini)
 - `lib/core/session_policy.dart` — kebijakan murni, `maxIdle = 60 hari`.
 - `lib/services/session_store.dart` (+ Secure/InMemory) — token, lastActiveAt, email terakhir.
 - Sliding session: `touch()` di cold start & resume background, throttle 1 jam.
