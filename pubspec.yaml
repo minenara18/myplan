@@ -25,6 +25,8 @@ dev_dependencies:
   very_good_analysis: ^5.1.0
   flutter_test:
     sdk: flutter
+  flutter_native_splash: ^2.4.4
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
   uses-material-design: true
@@ -40,3 +42,21 @@ flutter:
 
   assets:
     - assets/circles/
+    - assets/brand/
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/brand/logo.png
+  remove_alpha_ios: true
+
+# Logo saat ini adalah PLACEHOLDER yang digenerate lewat skrip —
+# sediakan logo asli 1024x1024 di assets/brand/logo.png lalu jalankan ulang:
+#   dart run flutter_launcher_icons
+#   dart run flutter_native_splash:create
+flutter_native_splash:
+  color: '#FFFFFF'
+  image: assets/brand/logo.png
+  android_12:
+    color: '#FFFFFF'
+    image: assets/brand/logo.png
