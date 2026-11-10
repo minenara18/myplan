@@ -5,11 +5,18 @@ Prefix `/api` (dari `bootstrap/app.php`) — dari aplikasi Flutter disesuaikan
 lewat `--dart-define=API_BASE_URL` (default `http://10.0.2.2:8000/api`).
 
 ## Autentikasi (tanpa token)
-
 | Method | Endpoint | Aksi | Keterangan |
 | --- | --- | --- | --- |
 | POST | `/auth/register` | Daftar akun baru | Nama, email, password; mengembalikan token Sanctum. |
 | POST | `/auth/login` | Masuk | Email + password; mengembalikan token Sanctum. |
+
+### Masa berlaku token (sesi 60 hari)
+
+- Register/login membuat token berlaku **60 hari** (`expires_at = now() + 60 hari`).
+- Setiap request terautentikasi memperpanjang `expires_at` ke *sekarang + 60 hari* (middleware `RenewSessionToken`), **maksimal sekali per jam per token** — tulis DB di-throttle lewat Cache (kunci `renew-session:{id}`).
+- Lewat 60 hari tanpa dibuka, endpoint terproteksi mengembalikan 401 `code: session_expired`; 401 lain tetap `TIDAK_TERAUTENTIKASI`.
+- Jadwal harian `sanctum:prune-expired --hours=24` membersihkan token yang kedaluwarsa lebih 24 jam (lihat `routes/console.php`).
+- **Catatan produksi:** driver Cache **tidak boleh `null`/`none`** karena throttle perpanjangan token memakainya; di `config/cache.php` pilih database/redis/file.
 
 ## Dilindungi `auth:sanctum`
 
@@ -71,7 +78,7 @@ lewat `--dart-define=API_BASE_URL` (default `http://10.0.2.2:8000/api`).
 
 | Kode | Kondisi | Bentuk |
 | --- | --- | --- |
-| 401 | Token tidak valid/kedaluwarsa | Aplikasi menghapus token dan berbalik ke `/login`. |
+| 401 | Token tidak valid, atau kedaluwarsa (`code: session_expired` bila lewat batas idle 60 hari) | Aplikasi menghapus token dan berbalik ke `/login` (dengan banner bila `session_expired`). |
 | 422 | Galat validasi | `errors` per bidang; dipetakan jadi `ValidationFailure`. |
 | 429 | Melebihi throttle (`/ai/*`) | Pesan batas laju lewat `Failure`. |
 | 5xx / jaringan | Server atau koneksi mati | Dipetakan jadi `NetworkFailure` (kartu coba lagi di layar). |
