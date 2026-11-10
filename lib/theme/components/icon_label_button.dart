@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 import 'package:ai_study_planner/theme/color_tokens.dart';
 
@@ -30,7 +30,7 @@ class IconLabelButton extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.8),
+            color: ColorTokens.white.withValues(alpha: 0.8),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Row(

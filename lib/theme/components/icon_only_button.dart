@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 import 'package:ai_study_planner/theme/color_tokens.dart';
 
@@ -34,7 +34,7 @@ class IconOnlyButton extends StatelessWidget {
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.8),
+            color: ColorTokens.white.withValues(alpha: 0.8),
             shape: BoxShape.circle,
           ),
           child: Icon(

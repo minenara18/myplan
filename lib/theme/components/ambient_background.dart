@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 import 'package:ai_study_planner/theme/color_tokens.dart';
 
@@ -25,7 +25,7 @@ class _AmbientPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     // Latar putih
-    final bgPaint = Paint()..color = Colors.white;
+    final bgPaint = Paint()..color = ColorTokens.white;
     canvas.drawRect(Offset.zero & size, bgPaint);
 
     // Lingkaran Moonstone & Vanilla yang diburamkan

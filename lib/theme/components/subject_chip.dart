@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 import 'package:ai_study_planner/theme/color_tokens.dart';
 
@@ -19,7 +19,7 @@ class SubjectChip extends StatelessWidget {
       label: Text(subject),
       selected: false,
       onSelected: (selected) => onSelected?.call(subject),
-      backgroundColor: Colors.white.withValues(alpha: 0.8),
+      backgroundColor: ColorTokens.white.withValues(alpha: 0.8),
       selectedColor: ColorTokens.vanilla.withValues(alpha: 0.15),
       checkmarkColor: ColorTokens.vanilla,
       labelStyle: const TextStyle(

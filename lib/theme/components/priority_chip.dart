@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 import 'package:ai_study_planner/theme/color_tokens.dart';
 
@@ -44,7 +44,7 @@ class PriorityChip extends StatelessWidget {
       label: Text(label),
       selected: false,
       onSelected: (selected) => onSelected?.call(priority),
-      backgroundColor: Colors.white.withValues(alpha: 0.8),
+      backgroundColor: ColorTokens.white.withValues(alpha: 0.8),
       selectedColor: color.withValues(alpha: 0.15),
       checkmarkColor: color,
       labelStyle: const TextStyle(

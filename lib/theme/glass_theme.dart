@@ -13,11 +13,11 @@ extension GlassThemeExtension on ThemeData {
 
   /// Bayangan kaca - Moonstone 15%
   Color get glassShadowColor => Color.fromARGB(
-    (255 * 0.15).toInt(),
-    76,
-    157,
-    176,
-  );
+        (255 * 0.15).toInt(),
+        76,
+        157,
+        176,
+      );
 
   /// Border radius standar kartu kaca
   BorderRadius get glassRadius => BorderRadius.circular(24);

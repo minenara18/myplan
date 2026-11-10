@@ -1,4 +1,4 @@
-﻿import 'dart:ui';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import 'package:ai_study_planner/theme/color_tokens.dart';
@@ -36,7 +36,7 @@ class GlassCard extends StatelessWidget {
       margin: margin,
       padding: padding,
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: isHero ? 0.6 : 0.0),
+        color: ColorTokens.white.withValues(alpha: isHero ? 0.6 : 0.0),
         border: Border.all(
           color: ColorTokens.moonstone.withValues(alpha: isHero ? 0.4 : 0.2),
           width: isHero ? 2 : 1,

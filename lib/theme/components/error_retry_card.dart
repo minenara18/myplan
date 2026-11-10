@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 import 'package:ai_study_planner/l10n/app_localizations.dart';
 import 'package:ai_study_planner/theme/color_tokens.dart';
@@ -53,8 +53,7 @@ class ErrorRetryCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(24),
                 child: Container(
                   height: 48,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24),
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
                   decoration: BoxDecoration(
                     color: ColorTokens.moonstone,
                     borderRadius: BorderRadius.circular(24),
@@ -66,7 +65,7 @@ class ErrorRetryCard extends StatelessWidget {
                       fontFamily: 'Inter',
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: ColorTokens.white,
                     ),
                   ),
                 ),

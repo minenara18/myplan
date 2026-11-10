@@ -1,4 +1,4 @@
-﻿import 'dart:ui';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import 'package:ai_study_planner/theme/color_tokens.dart';
@@ -40,7 +40,7 @@ class GlassBottomBar extends StatelessWidget {
         child: Container(
           height: 72,
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.6),
+            color: ColorTokens.white.withValues(alpha: 0.6),
             border: Border(
               top: BorderSide(
                 color: ColorTokens.moonstone.withValues(alpha: 0.2),
@@ -86,7 +86,8 @@ class _BottomIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final activeColor = ColorTokens.vanilla;
-    final inactiveColor = ColorTokens.moonstone.withValues(alpha: 0.5);
+    // Moonstone penuh (3.06:1) agar ikon pasif memenuhi ambang kontras non-teks 3:1.
+    final inactiveColor = ColorTokens.moonstone;
 
     Widget child = Icon(
       icon,
