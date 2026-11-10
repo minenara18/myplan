@@ -45,17 +45,30 @@ Reduce motion (Android *Accessibility > Remove animations* aktif):
 | 2.10 | Perpindahan tab bar bawah | Konten langsung ke keadaan akhir, tanpa animasi lama | |
 | 2.11 | Skeleton layar AI (kondisi Loading) | Tetap informatif tanpa dapat mengganggu mata | |
 
-## 3. Alur sesi 60 hari & splash (rencana Fase E — belum ada kodenya)
+## 3. Alur sesi 60 hari & splash (Fase E — kodenya sudah ada)
 
-Sesuai `docs/sesi.md`, sliding session dan layar splash belum
-diimplementasikan. Daftar periksa untuk saat fase E dikerjakan:
+Sliding session dan splash sudah diimplementasikan (lihat `docs/sesi.md`).
+Daftar periksa ini dijalankan di emulator/perangkat dengan backend berjalan
+(`USE_FAKE=false`); untuk kedaluwarsa, majukan tanggal perangkat terlebih
+dahulu (jam fake), lalu buka aplikasi:
+
+```powershell
+# contoh majukan tanggal emulator Android (perlu adb root):
+adb root; adb shell date 0109120000.00   # ke 9 Januari 12:00 (+61 hari dari 10 Nov)
+# alternatif tanpa adb root: GUI emulator > Extended controls > Date & time
+```
+
+Catatan jam fake: selesai mengujinya, **kembalikan tanggal** perangkat —
+jam mundur sengaja diabaikan oleh `SessionStore` (lastActiveAt tidak
+pernah diturunkan), jadi tanggal yang keliru tidak merusak sesi asli.
 
 | # | Skenario | Harapan | Hasil |
 | --- | --- | --- | --- |
-| 3.1 | Login, tutup app, buka lagi di hari yang sama | Masuk langsung tanpa login ulang | |
-| 3.2 | Majukan tanggal perangkat 61 hari, buka app | Diminta login ulang; email terakhir terisi (prefill) | |
-| 3.3 | App dibuka tiap hari < 60 hari | Sesi terus diperbarui (touch dibatasi sekali per jam) | |
-| 3.4 | Splash | Splash natif putih + logo tampil sebelum route pertama | |
+| 3.1 | Login, tutup app, buka lagi di hari yang sama | Splash Flutter tampil lalu langsung ke `/beranda` tanpa login ulang | |
+| 3.2 | Tutup app, majukan jam perangkat 61 hari, buka app | Splash lalu diminta login dengan banner "Sesi kamu sudah berakhir"; email terakhir terisi (prefill) | |
+| 3.3 | App dibuka tiap hari < 60 hari | Sesi terus diperbarui (touch dibatasi sekali per jam); tetap langsung ke `/beranda` | |
+| 3.4 | Splash | Splash natif putih + logo tampil sebelum route pertama, lalu kartu kaca splash Flutter dengan animasi 600 ms | |
+| 3.5 | Keluar (`/auth/logout`) mencabut token, lalu pakai app: request berikutnya 401 biasa | App menuju `/login` polos tanpa banner kedaluwarsa (rute `NeedsLogin(pertamaKali)`) | |
 
 ## 4. Alur mode fake
 

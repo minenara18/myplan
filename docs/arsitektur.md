@@ -148,20 +148,57 @@ poin, dan 5 pertanyaan latihan. Hasil bisa disimpan sebagai catatan pada sebuah
 tugas (`simpanSebagaiCatatan` → `PUT /tasks/{task}` dengan kolom `catatan`
 terisi).
 
-## 5. Autentikasi dan sesi
+## 5. Autentikasi dan sesi (Fase E)
 
-- Token Sanctum; tabel `personal_access_tokens`.
-- `TokenStorage` (flutter_secure_storage). `Dio` menyuntikkan header
-  `Authorization: Bearer` pada tiap request; bila respons 401, token dihapus dan
-  aplikasi memaksa kembali ke `/login` (guard `lib/routing/`).
-- Redirect guard urutannya: belum login → `/login`; login tapi belum
-  onboarding → `/onboarding`; sudah lengkap dan membuka halaman auth → `/beranda`.
+- Token Sanctum dengan masa berlaku 60 hari; tabel `personal_access_tokens`.
+- Flutter: `TokenStorage` (flutter_secure_storage) menyimpan token,
+  SharedPreferences menyimpan `lastActiveAt` + email terakhir
+  (`SessionStore`); `SessionPolicy.maxIdle = 60 hari` sumber tunggal batas.
+- `Dio` menyuntikkan header `Authorization: Bearer`; 401 diteruskan sebagai
+  `UnauthorizedInfo{path, code}` — pemilahannya di `sambungkanPengecualian401`
+  (`lib/bootstrap.dart`): 401 login/register diabaikan, `session_expired`
+  menggugurkan sesi dengan banner, 401 lain login polos.
+- Backend: register/login memberi token 60 hari; middleware
+  `RenewSessionToken` memperpanjang `expires_at` (throttle tulis via Cache
+  60 menit/token); jadwal harian `sanctum:prune-expired --hours=24`;
+  `AuthenticationException` yang kehabisan masa berlaku menghasilkan 401
+  `code: session_expired`.
+- Redirect guard urutannya: belum login → `/login` (dengan banner bila
+  kedaluwarsa); login tapi belum onboarding → `/onboarding`; sudah lengkap
+  dan membuka halaman auth → `/beranda`.
 
-> **Belum diimplementasikan (rencana Fase E, lihat `docs/sesi.md`):** sliding
-> session 60 hari (`lib/core/session_policy.dart`, `maxIdle = 60 hari`,
-> `touch()` di cold start dan resume, Sanctum `expires_at`), dan layar splash
-> Flutter. Yang sudah ada hanya splash natif Android/iOS berlatar putih dan
-> ikon launcher (logo saat ini masih placeholder).
+Alur sesi & splash saat aplikasi dibuka:
+
+```mermaid
+sequenceDiagram
+    participant M as Mahasiswa (buka app)
+    participant SP as SplashNotifier
+    participant P as SessionPolicy (core)
+    participant ST as SessionStore (services)
+    participant K as SessionKeeper (routing)
+    participant B as Laravel (Sanctum)
+
+    M->>SP: /splash (initialLocation)
+    SP->>ST: baca token, onboarding, lastActiveAt
+    ST-->>SP: token, onboarding selesai, lastActiveAt
+    SP->>P: evaluate(now, lastActiveAt, hasToken, onboardingDone)
+    P-->>SP: SessionDecision (sealed)
+    SP->>K: tetapkan(decision) -> ruteSesi(decision)
+    alt decision = NeedsLogin(kedaluwarsa)
+        SP-->>M: /login?reason=kedaluwarsa (banner + prefill email)
+    else NeedsLogin(pertamaKali) / NeedsOnboarding
+        SP-->>M: /login atau /onboarding
+    else Authenticated
+        SP->>B: request terautentikasi
+        B->>B: RenewSessionToken perpanjang expires_at (throttle 1 jam)
+        SP-->>M: /beranda (selisih <= 60 hari)
+    end
+    Note over B: token lewat 60 hari tanpa dibuka -> 401 code session_expired
+```
+
+Saat aplikasi berjalan dan respons 401 datang di tengah pemakaian
+(`session_expired`), ApiClient menghapus sesi lalu menginformasikan
+`SessionKeeper` sehingga router langsung menuju `/login` dengan banner.
 
 ## 6. Kasus penggunaan utama
 
@@ -191,5 +228,7 @@ melipat ke bawah pada skala teks besar.
 | Fake vs Remote lewat `USE_FAKE` | Demo magang bisa jalan tanpa backend, hanya ganti dart-define, tanpa mengubah kode. |
 | `sealed Failure` + `AsyncValue` | Kegagalan jaringan adalah nilai bertipe; tidak ada catch kosong. |
 | `Clock` disuntik | Kalender, tugas, dan fokus memakai hari tetap (9 Nov 2026) di test. |
+| Kebijakan sesi murni (`sealed SessionDecision`) | `SessionPolicy` tanpa Flutter; guard, splash, dan test memakai keputusan yang sama dengan satu sumber kebenaran `maxIdle`. |
+| Splash offline-first | Warm-up tidak menunggu jaringan (maks 4 s); keputusan sesi murni lokal dari penyimpanan perangkat. |
 | l10n dictionary hand-written | codegen `flutter gen-l10n` gagal pada layout arb proyek ini (l10n.yaml dihapus, lihat `docs/sesi.md`); dictionary sederhana dengan fallback aman ke kunci. |
 | `BackdropFilter` dibatasi | Hanya `GlassCard` (varian hero) dan `GlassBottomBar` memakai blur; item dalam daftar memakai panel semi-transparan tanpa blur. |

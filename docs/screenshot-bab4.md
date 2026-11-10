@@ -29,14 +29,16 @@ hari pengambilan layar (jam tetap FakeClock tidak berlaku di app sungguhan).
 | 17 | Profil | Pengaturan: pengingat, durasi Pomodoro, waktu luang; tombol Keluar | Implementasi aplikasi (profil) |
 | 18 | Dialog konfirmasi keluar | AlertDialog konfirmasi | Implementasi aplikasi (profil) |
 | 19 | Layar dengan skala teks 2.0 (contoh: Tasks) | `adb shell settings put system font_scale 2.0` | Pengujian aksesibilitas |
-| 20 | Hasil uji `flutter test` | Terminal `+108: All tests passed!` | Pengujian |
-| 21 | Hasil uji backend | Terminal `php artisan test` (29 test, 142 assertion) | Pengujian |
-| 22 | DevTools performance | Trace frame saat gulir daftar Tugas (profile mode) | Pengujian (kualitas) |
+| 20 | Splash Flutter | Aplikasi dibuka ulang dengan sesi hidup; kartu kaca logo sebelum `/beranda` | Implementasi aplikasi (sesi & splash) |
+| 21 | Login dengan banner kedaluwarsa | Jam perangkat dimajukan 61 hari; `/login?reason=kedaluwarsa` dengan banner + surel prefill | Implementasi aplikasi (sesi) |
+| 22 | Hasil uji `flutter test` | Terminal `+156: All tests passed!` | Pengujian |
+| 23 | Hasil uji backend | Terminal `php artisan test` (36 test, 166 assertion) | Pengujian |
+| 24 | DevTools performance | Trace frame saat gulir daftar Tugas (profile mode) | Pengujian (kualitas) |
 
 Screenshot yang **tidak bisa diambil saat ini**:
 
 - Jalankan di emulator/perangkat — belum tersedia; seluruh tangkapan layar di
   atas masih perlu diambil setelah emulator dipasang (lihat
   `docs/uji-manual.md`).
-- Splash Flutter tidak ada di kode (rencana Fase E, `docs/sesi.md`) — hanya ada
-  splash natif putih + logo placeholder.
+- `assets/brand/logo.png` masih placeholder — splash/ikon launcher memakai
+  logo sementara sampai logo asli diganti (lihat `docs/sesi.md`).

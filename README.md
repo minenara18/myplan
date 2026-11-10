@@ -77,10 +77,10 @@ Angka hasil terakhir (rinci per kasus di `docs/hasil-pengujian.md`):
 
 | Pemeriksaan | Hasil terakhir |
 | --- | --- |
-| `flutter analyze` | No issues found! (0 issue) |
-| `flutter test` (unit + widget) | 108 test lulus |
+| `flutter analyze --no-pub` | No issues found! (0 issue) |
+| `flutter test` (unit + widget) | 156 test lulus |
 | `flutter test integration_test` | **Belum dijalankan** — tidak ada emulator/perangkat |
-| `php artisan test` (SQLite in-memory) | 29 test lulus, 142 assertion |
+| `php artisan test` (SQLite in-memory) | 36 test lulus, 166 assertion |
 | Uji database PostgreSQL | Migrasi PostgreSQL belum dijalankan — pengujian hanya di SQLite |
 | `flutter build apk --release` | app-release.apk 52.9 MB (debug-signed) |
 
@@ -94,11 +94,11 @@ lib/
   core/                  # model murni, Result/Failure, Clock
   data/                  # ApiClient (Dio), repository fake & remote, observer
   services/              # preferensi (SharedPreferences), token storage
-  routing/               # route, guard redirect (login/onboarding)
+  routing/               # route, guard redirect (login/onboarding), SessionKeeper
   theme/                 # token warna/typography + komponen kaca (components/)
   l10n/                  # dictionary teks Indonesia (hand-written) + app_id.arb
   features/
-    onboarding/ auth/ home/ tasks/ calendar/ ai_planner/ focus_timer/
+    onboarding/ auth/ splash/ home/ tasks/ calendar/ ai_planner/ focus_timer/
     progress/ profile/
 backend/
   app/Http/Controllers/Api/   # controller per resource
@@ -107,6 +107,7 @@ backend/
   database/migrations/        # users(+settings), courses, tasks, study_sessions,
                               # focus_records, ai_plans, personal_access_tokens
   routes/api.php              # semua endpoint (lihat docs/endpoint.md)
+  routes/console.php          # jadwal harian sanctum:prune-expired
   docs/openapi.yaml           # spesifikasi OpenAPI lengkap
 docs/
   arsitektur.md  endpoint.md  hasil-pengujian.md  uji-manual.md
@@ -126,9 +127,18 @@ docs/
   minimal 48px, warna tidak jadi satu-satunya penanda status, seluruh layar
   diuji pada skala teks 1.0 dan 2.0 tanpa overflow.
 
+## Sesi 60 hari & splash
+
+Aplikasi memakai sliding session: token login berlaku 60 hari dan diperpanjang
+otomatis selama aplikasi dipakai; lewat 60 hari tanpa dibuka, pengguna diminta
+login kembali dengan banner (email terakhir tetap terisi). Splash Flutter
+mengarahkan pengguna sesuai keputusan sesi (`lib/core/session_policy.dart`).
+Rinciannya di `docs/sesi.md`.
+
 ## Catatan
 
-- **Splash & sesi 60 hari belum diimplementasikan** — rencananya bagian Fase E,
-  lihat `docs/sesi.md`. Ikon/splash natif sudah disiapkan, kode Flutter-nya belum.
+- Ikon/splash natif memakai logo **placeholder**; ganti `assets/brand/logo.png`
+  lalu jalankan ulang `dart run flutter_launcher_icons` dan
+  `dart run flutter_native_splash:create` (lihat `docs/sesi.md`).
 - Riwayat mingguan kerja ada di `CHANGELOG.md`; `docs/catatan-mingguan.md`
   tidak ada (belum pernah dibuat) — lihat catatan di CHANGELOG.md.
