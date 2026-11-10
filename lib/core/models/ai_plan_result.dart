@@ -28,5 +28,6 @@ class AiPlanResult extends Equatable {
   final List<String> prioritas;
 
   @override
-  List<Object?> get props => [sumber, rentangMulai, rentangSampai, sesi, prioritas];
+  List<Object?> get props =>
+      [sumber, rentangMulai, rentangSampai, sesi, prioritas];
 }

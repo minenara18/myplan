@@ -21,7 +21,8 @@ class RemoteTaskRepository implements TaskRepository {
   @override
   Stream<List<Task>> watchTasksByCourse(String courseId) async* {
     try {
-      final response = await _dio.get('/tasks', queryParameters: {'course_id': courseId});
+      final response =
+          await _dio.get('/tasks', queryParameters: {'course_id': courseId});
       final data = (response.data as Map<String, dynamic>)['data'] as List;
       yield data
           .map((item) => TaskDto.fromJson(item as Map<String, dynamic>))

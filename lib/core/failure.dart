@@ -67,5 +67,6 @@ final class ServerFailure extends Failure {
 
 /// Kegagalan yang tidak terklasifikasi.
 final class UnknownFailure extends Failure {
-  const UnknownFailure([super.message = 'Terjadi kesalahan yang tidak diketahui.']);
+  const UnknownFailure(
+      [super.message = 'Terjadi kesalahan yang tidak diketahui.']);
 }

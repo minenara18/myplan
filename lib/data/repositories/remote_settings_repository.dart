@@ -19,8 +19,7 @@ class RemoteSettingsRepository implements SettingsRepository {
           as Map<String, dynamic>;
       return AppSettings(
         reminderEnabled: data['reminder_enabled'] as bool? ?? true,
-        defaultPomodoroMinutes:
-            data['default_pomodoro_minutes'] as int? ?? 25,
+        defaultPomodoroMinutes: data['default_pomodoro_minutes'] as int? ?? 25,
         dailyFreeTimeStart: data['daily_free_time_start'] as int? ?? 16,
         dailyFreeTimeEnd: data['daily_free_time_end'] as int? ?? 21,
       );

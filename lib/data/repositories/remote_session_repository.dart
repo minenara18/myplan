@@ -17,8 +17,7 @@ class RemoteSessionRepository implements SessionRepository {
   Stream<List<StudySession>> watchSessions() async* {
     try {
       final response = await _dio.get<Object?>('/sessions');
-      final data =
-          (response.data as Map<String, dynamic>)['data'] as List;
+      final data = (response.data as Map<String, dynamic>)['data'] as List;
       yield data
           .map((item) => StudySessionDto.fromJson(item as Map<String, dynamic>))
           .toList();
@@ -34,8 +33,7 @@ class RemoteSessionRepository implements SessionRepository {
         '/sessions',
         queryParameters: {'course_id': courseId},
       );
-      final data =
-          (response.data as Map<String, dynamic>)['data'] as List;
+      final data = (response.data as Map<String, dynamic>)['data'] as List;
       yield data
           .map((item) => StudySessionDto.fromJson(item as Map<String, dynamic>))
           .toList();

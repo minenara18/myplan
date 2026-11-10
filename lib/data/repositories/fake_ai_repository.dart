@@ -25,13 +25,15 @@ class FakeAiRepository implements AiRepository {
       AiPlanBlock(
         taskId: 'task-2',
         mulai: clock.now().add(const Duration(days: 1, hours: 8)),
-        selesai: clock.now().add(const Duration(days: 1, hours: 9, minutes: 30)),
+        selesai:
+            clock.now().add(const Duration(days: 1, hours: 9, minutes: 30)),
         alasan: 'Slot waktu luang besok, setelah sesi yang sudah ada.',
       ),
       AiPlanBlock(
         taskId: 'task-2',
         mulai: clock.now().add(const Duration(days: 2, hours: 8)),
-        selesai: clock.now().add(const Duration(days: 2, hours: 8, minutes: 30)),
+        selesai:
+            clock.now().add(const Duration(days: 2, hours: 8, minutes: 30)),
         alasan: 'Lanjutan tugas besok dalam blok kecil.',
       ),
     ];

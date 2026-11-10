@@ -1,5 +1,4 @@
 import 'package:ai_study_planner/core/models/study_session.dart';
-import 'package:ai_study_planner/features/calendar/presentation/notifier/calendar_notifier.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Interface repositori sesi studi.
@@ -27,11 +26,4 @@ final sessionRepositoryProvider = Provider<SessionRepository>((ref) {
     'SessionRepository belum di-override di bootstrap. '
     'Gunakan FakeSessionRepository atau RemoteSessionRepository.',
   );
-});
-
-/// Provider CalendarNotifier.
-final calendarNotifierProvider =
-    ChangeNotifierProvider<CalendarNotifier>((ref) {
-  final repo = ref.watch(sessionRepositoryProvider);
-  return CalendarNotifier(repo);
 });

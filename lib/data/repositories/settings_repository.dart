@@ -22,7 +22,8 @@ class AppSettings {
   }) {
     return AppSettings(
       reminderEnabled: reminderEnabled ?? this.reminderEnabled,
-      defaultPomodoroMinutes: defaultPomodoroMinutes ?? this.defaultPomodoroMinutes,
+      defaultPomodoroMinutes:
+          defaultPomodoroMinutes ?? this.defaultPomodoroMinutes,
       dailyFreeTimeStart: dailyFreeTimeStart ?? this.dailyFreeTimeStart,
       dailyFreeTimeEnd: dailyFreeTimeEnd ?? this.dailyFreeTimeEnd,
     );

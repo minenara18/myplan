@@ -4,12 +4,12 @@ import 'package:ai_study_planner/data/repositories/settings_repository.dart';
 class FakeSettingsRepository implements SettingsRepository {
   FakeSettingsRepository({AppSettings? initialSettings})
       : _settings = initialSettings ??
-          const AppSettings(
-            reminderEnabled: true,
-            defaultPomodoroMinutes: 25,
-            dailyFreeTimeStart: 16,
-            dailyFreeTimeEnd: 21,
-          );
+            const AppSettings(
+              reminderEnabled: true,
+              defaultPomodoroMinutes: 25,
+              dailyFreeTimeStart: 16,
+              dailyFreeTimeEnd: 21,
+            );
 
   AppSettings _settings;
 

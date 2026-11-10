@@ -4,8 +4,7 @@ import 'package:ai_study_planner/data/repositories/focus_repository.dart';
 
 /// Implementasi in-memory dari FocusRepository.
 class FakeFocusRepository implements FocusRepository {
-  FakeFocusRepository(
-      {required this.clock, List<FocusRecord>? initialRecords})
+  FakeFocusRepository({required this.clock, List<FocusRecord>? initialRecords})
       : _records = initialRecords ?? _defaultRecords(clock);
 
   final Clock clock;

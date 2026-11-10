@@ -65,8 +65,8 @@ class TimerMachineState {
       return duration.inMinutes * 60;
     }
     final now = DateTime.now();
-    final elapsed = elapsedBeforePause.inSeconds +
-        now.difference(startedAt!).inSeconds;
+    final elapsed =
+        elapsedBeforePause.inSeconds + now.difference(startedAt!).inSeconds;
     final remaining = duration.inMinutes * 60 - elapsed;
     return remaining < 0 ? 0 : remaining;
   }

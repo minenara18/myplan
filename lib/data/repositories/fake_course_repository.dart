@@ -13,31 +13,31 @@ class FakeCourseRepository implements CourseRepository {
   final List<Course> _courses;
 
   static List<Course> _defaultCourses() => [
-    Course(
-      id: 'course-1',
-      nama: 'Pemrograman Mobile',
-      warnaIndex: 0,
-      ikon: const IconData(0xe800, fontFamily: 'MaterialIcons'),
-    ),
-    Course(
-      id: 'course-2',
-      nama: 'Basis Data',
-      warnaIndex: 1,
-      ikon: const IconData(0xe801, fontFamily: 'MaterialIcons'),
-    ),
-    Course(
-      id: 'course-3',
-      nama: 'Jaringan Komputer',
-      warnaIndex: 2,
-      ikon: const IconData(0xe802, fontFamily: 'MaterialIcons'),
-    ),
-    Course(
-      id: 'course-4',
-      nama: 'Kecerdasan Buatan',
-      warnaIndex: 3,
-      ikon: const IconData(0xe803, fontFamily: 'MaterialIcons'),
-    ),
-  ];
+        Course(
+          id: 'course-1',
+          nama: 'Pemrograman Mobile',
+          warnaIndex: 0,
+          ikon: const IconData(0xe800, fontFamily: 'MaterialIcons'),
+        ),
+        Course(
+          id: 'course-2',
+          nama: 'Basis Data',
+          warnaIndex: 1,
+          ikon: const IconData(0xe801, fontFamily: 'MaterialIcons'),
+        ),
+        Course(
+          id: 'course-3',
+          nama: 'Jaringan Komputer',
+          warnaIndex: 2,
+          ikon: const IconData(0xe802, fontFamily: 'MaterialIcons'),
+        ),
+        Course(
+          id: 'course-4',
+          nama: 'Kecerdasan Buatan',
+          warnaIndex: 3,
+          ikon: const IconData(0xe803, fontFamily: 'MaterialIcons'),
+        ),
+      ];
 
   @override
   Stream<List<Course>> watchCourses() async* {
