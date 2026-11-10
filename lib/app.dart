@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:ai_study_planner/l10n/app_localizations.dart';
 import 'package:ai_study_planner/routing/app_router.dart';
 
-class MyApp extends StatelessWidget {
+/// Root aplikasi: MaterialApp.router dengan GoRouter dari provider,
+/// locale Indonesia, dan mode terang saja sesuai desain.
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp.router(
-      title: 'AI Study Planner',
-      routerConfig: goRouter,
+      title: 'MyPlan',
+      routerConfig: ref.watch(goRouterProvider),
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
@@ -19,9 +22,8 @@ class MyApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: AppLocalizations.supportedLocales,
-      locale: const Locale('en', ''),
+      locale: const Locale('id', ''),
       theme: ThemeData.light(),
-      darkTheme: ThemeData.dark(),
       themeMode: ThemeMode.light,
     );
   }

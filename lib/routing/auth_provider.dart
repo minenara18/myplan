@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Status autentikasi dan onboarding (sementara fake).
+import 'package:ai_study_planner/features/auth/presentation/notifier/auth_notifier.dart';
+
+/// Status autentikasi yang dibaca oleh redirect guard (fungsi murni).
 final class AuthStatus {
   const AuthStatus({
     required this.isOnboarded,
@@ -14,21 +16,12 @@ final class AuthStatus {
   bool get needsLogin => !isLoggedIn;
 }
 
-/// Provider palsu (temporary fake) untuk status onboarding dan login.
-/// Digunakan oleh redirect guard sebelum backend tersedia.
-final class FakeAuthProvider {
-  const FakeAuthProvider();
-
-  AuthStatus get status => const AuthStatus(
-        isOnboarded: false,
-        isLoggedIn: false,
-      );
-}
-
-/// Riverpod provider untuk FakeAuthProvider (temporary).
-final fakeAuthProvider = Provider<FakeAuthProvider>((ref) => const FakeAuthProvider());
-
-/// Riverpod provider untuk status auth yang dibaca oleh redirect guard.
+/// Provider status auth: dipetakan dari AuthState yang muncul
+/// setelah login/register/onboarding lewat AuthNotifier.
 final authStatusProvider = Provider<AuthStatus>((ref) {
-  return ref.watch(fakeAuthProvider).status;
+  final state = ref.watch(authNotifierProvider);
+  return AuthStatus(
+    isOnboarded: state.isOnboardingCompleted,
+    isLoggedIn: state.isLoggedIn,
+  );
 });

@@ -30,8 +30,7 @@ final _appClock = SystemClock();
 
 /// Pilih sumber data lewat --dart-define=USE_FAKE=true|false.
 /// Bila false, semua repository memakai implementasi remote (Dio).
-const bool useFakeData =
-    bool.fromEnvironment('USE_FAKE', defaultValue: true);
+const bool useFakeData = bool.fromEnvironment('USE_FAKE', defaultValue: true);
 
 Future<ProviderScope> bootstrap() async {
   final prefs = await SharedPreferences.getInstance();
