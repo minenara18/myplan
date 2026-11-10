@@ -11,7 +11,7 @@ void main() {
 
     setUp(() {
       repo = FakeSessionRepository(clock: SystemClock());
-      notifier = CalendarNotifier(repo);
+      notifier = CalendarNotifier(repo, clock: SystemClock());
     });
 
     test('initial state is loading', () {

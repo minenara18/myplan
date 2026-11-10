@@ -147,7 +147,8 @@ void main() {
         );
       }
 
-      final repo = RemoteCourseRepository(dio: dioWith(FakeDioAdapter(onFetch)));
+      final repo =
+          RemoteCourseRepository(dio: dioWith(FakeDioAdapter(onFetch)));
 
       await expectLater(
         repo.watchCourses().first,
@@ -227,7 +228,8 @@ void main() {
         ),
       );
 
-      final captured = adapter.capturedRequests.single.data as Map<String, dynamic>;
+      final captured =
+          adapter.capturedRequests.single.data as Map<String, dynamic>;
       expect(captured['task_id'], 'task-1');
     });
   });

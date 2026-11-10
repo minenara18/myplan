@@ -59,8 +59,7 @@ void main() {
 }
 
 /// Preferences palsu untuk pengujian notifier.
-class FakeOnboardingPreferencesService
-    implements OnboardingPreferencesService {
+class FakeOnboardingPreferencesService implements OnboardingPreferencesService {
   bool _completed = false;
 
   @override

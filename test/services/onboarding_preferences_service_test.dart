@@ -20,8 +20,7 @@ void main() {
 }
 
 /// Preferences palsu untuk pengujian.
-class FakeOnboardingPreferencesService
-    implements OnboardingPreferencesService {
+class FakeOnboardingPreferencesService implements OnboardingPreferencesService {
   bool _completed = false;
 
   @override

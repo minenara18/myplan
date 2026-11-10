@@ -12,7 +12,7 @@ void main() {
 
     setUp(() {
       repo = FakeTaskRepository(clock: SystemClock());
-      notifier = TasksNotifier(repo);
+      notifier = TasksNotifier(repo, clock: SystemClock());
     });
 
     test('initial state is loading', () {

@@ -6,7 +6,8 @@ import 'package:ai_study_planner/features/tasks/presentation/widgets/task_item_w
 
 void main() {
   group('TaskItemWidget', () {
-    testWidgets('displays task title and priority', (WidgetTester tester) async {
+    testWidgets('displays task title and priority',
+        (WidgetTester tester) async {
       final task = Task(
         id: 't1',
         courseId: 'course-1',
