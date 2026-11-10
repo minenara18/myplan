@@ -13,7 +13,9 @@ import 'package:ai_study_planner/data/repositories/focus_repository.dart';
 import 'package:ai_study_planner/data/repositories/session_repository.dart';
 import 'package:ai_study_planner/data/repositories/settings_repository.dart';
 import 'package:ai_study_planner/data/repositories/task_repository.dart';
+import 'package:ai_study_planner/routing/session_keeper.dart';
 import 'package:ai_study_planner/services/onboarding_preferences_service.dart';
+import 'package:ai_study_planner/services/session_store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -48,10 +50,15 @@ class ScreenHarness {
   late FakeFocusRepository focusRepo;
   late FakeSettingsRepository settingsRepo;
   late FakeAiRepository aiRepo;
+  late InMemorySessionStore sessionStore;
+  late SessionKeeper sessionKeeper;
 
   List<Override> overrides() => [
         clockProvider.overrideWithValue(clock),
         authRepositoryProvider.overrideWithValue(authRepo),
+        onboardingServiceProvider.overrideWithValue(onboardingService),
+        sessionStoreProvider.overrideWithValue(sessionStore),
+        sessionKeeperProvider.overrideWithValue(sessionKeeper),
         courseRepositoryProvider.overrideWithValue(courseRepo),
         taskRepositoryProvider.overrideWithValue(taskRepo),
         sessionRepositoryProvider.overrideWithValue(sessionRepo),
@@ -65,10 +72,13 @@ class ScreenHarness {
     SharedPreferences.setMockInitialValues({});
     final prefs = await SharedPreferences.getInstance();
     onboardingService = SharedPreferencesOnboardingService(prefs);
+    sessionStore = InMemorySessionStore();
+    sessionKeeper = SessionKeeper();
 
     authRepo = FakeAuthRepository(
       clock: clock,
       onboardingService: onboardingService,
+      sessionStore: sessionStore,
     );
     courseRepo = FakeCourseRepository(clock: clock);
     taskRepo = FakeTaskRepository(clock: clock);
