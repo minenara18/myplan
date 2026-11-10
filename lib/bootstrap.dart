@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:ai_study_planner/app.dart';
+import 'package:ai_study_planner/core/session_policy.dart';
 import 'package:ai_study_planner/core/system_clock.dart';
 import 'package:ai_study_planner/data/api/api_client.dart';
 import 'package:ai_study_planner/data/repositories/auth_repository.dart';
@@ -35,6 +38,40 @@ final _appClock = SystemClock();
 /// Bila false, semua repository memakai implementasi remote (Dio).
 const bool useFakeData = bool.fromEnvironment('USE_FAKE', defaultValue: true);
 
+/// Milah respons 401 dari ApiClient ke SessionKeeper:
+///
+/// - 401 dari /auth/login atau /auth/register (kredensial salah) DIBIARKAN:
+///   bukan kedaluwarsa; pesan kesalahan cukup tampil di form login.
+/// - 401 dengan code `session_expired` -> hapus token & keaktifan di
+///   aplikasi (surel terakhir disimpan) lalu keeper.kedaluwarsakan()
+///   sehingga login tampil dengan banner kedaluwarsa.
+/// - 401 lain pada endpoint terproteksi -> hapus sesi lalu login polos
+///   (NeedsLogin pertamaKali, tanpa banner).
+void sambungkanPengecualian401({
+  required ApiClient apiClient,
+  required SessionStore sessionStore,
+  required SessionKeeper keeper,
+}) {
+  apiClient.addUnauthorizedListener((info) {
+    final diEndpointAuth = info.path.endsWith('/auth/login') ||
+        info.path.endsWith('/auth/register');
+    if (diEndpointAuth) return;
+
+    if (info.code == 'session_expired') {
+      unawaited(
+        sessionStore.hapusSesi().then((_) => keeper.kedaluwarsakan()),
+      );
+      return;
+    }
+
+    unawaited(
+      sessionStore.hapusSesi().then(
+        (_) => keeper.tetapkan(const NeedsLogin(LoginReason.pertamaKali)),
+      ),
+    );
+  });
+}
+
 Future<ProviderScope> bootstrap() async {
   final prefs = await SharedPreferences.getInstance();
   final onboardingService = SharedPreferencesOnboardingService(prefs);
@@ -48,9 +85,12 @@ Future<ProviderScope> bootstrap() async {
     tokenStorage: apiClient.tokenStorage,
   );
 
-  // Respons 401 (termasuk code session_expired) menggugurkan sesi.
   final sessionKeeper = SessionKeeper();
-  apiClient.addUnauthorizedListener(sessionKeeper.kedaluwarsakan);
+  sambungkanPengecualian401(
+    apiClient: apiClient,
+    sessionStore: sessionStore,
+    keeper: sessionKeeper,
+  );
 
   late final AuthRepository authRepo;
   late final CourseRepository courseRepo;
