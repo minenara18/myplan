@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "AI Study Planner",
-    "description": "Koleksi Postman API perencana belajar. Semua endpoint (kecuali register/login) memakai Bearer token: daftar/masuk dulu, token bentuk `data.token`.",
+    "description": "Koleksi Postman API perencana belajar. Semua endpoint (kecuali register/login) memakai Bearer token: daftar/masuk dulu, token bentuk `data.token`. TOKEN BERLAKU 60 HARI dan diperpanjang otomatis pada setiap request terautentikasi (maksimal sekali per jam); lewat 60 hari tanpa dipakai, endpoint terproteksi mengembalikan 401 dengan `code: session_expired` — login ulang untuk token baru.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -69,7 +69,23 @@
         "header": [{ "key": "Accept", "value": "application/json" }],
         "url": { "raw": "{{base_url}}/courses", "host": ["{{base_url}}"], "path": ["courses"] },
         "body": { "mode": "raw", "raw": "{\n  \"nama\": \"Kecerdasan Buatan\"\n}" }
-      }
+      },
+      "response": [
+        {
+          "name": "Sesi kedaluwarsa (contoh)",
+          "originalRequest": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/courses", "host": ["{{base_url}}"], "path": ["courses"] }
+          },
+          "status": "Unauthorized",
+          "code": 401,
+          "_postman_previewlanguage": "json",
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "cookie": [],
+          "body": "{\n  \"message\": \"Sesi kamu sudah berakhir. Silakan masuk lagi.\",\n  \"errors\": [],\n  \"code\": \"session_expired\"\n}"
+        }
+      ]
     },
     {
       "name": "4 Buat tugas",
@@ -81,7 +97,23 @@
           "mode": "raw",
           "raw": "{\n  \"course_id\": 1,\n  \"judul\": \"Tugas Chatbot\",\n  \"tenggat\": \"2026-11-05T17:00:00+00:00\",\n  \"estimasi_menit\": 120,\n  \"prioritas\": \"tinggi\",\n  \"status\": \"belum\"\n}"
         }
-      }
+      },
+      "response": [
+        {
+          "name": "Sesi kedaluwarsa (contoh)",
+          "originalRequest": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/tasks", "host": ["{{base_url}}"], "path": ["tasks"] }
+          },
+          "status": "Unauthorized",
+          "code": 401,
+          "_postman_previewlanguage": "json",
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "cookie": [],
+          "body": "{\n  \"message\": \"Sesi kamu sudah berakhir. Silakan masuk lagi.\",\n  \"errors\": [],\n  \"code\": \"session_expired\"\n}"
+        }
+      ]
     },
     {
       "name": "5 Susun rencana AI (rate limit 5/menit)",
@@ -93,7 +125,23 @@
           "mode": "raw",
           "raw": "{\n  \"mulai\": \"2026-11-02\",\n  \"sampai\": \"2026-11-08\",\n  \"jam_mulai\": 16,\n  \"jam_selesai\": 21\n}"
         }
-      }
+      },
+      "response": [
+        {
+          "name": "Sesi kedaluwarsa (contoh)",
+          "originalRequest": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/ai/plan", "host": ["{{base_url}}"], "path": ["ai", "plan"] }
+          },
+          "status": "Unauthorized",
+          "code": 401,
+          "_postman_previewlanguage": "json",
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "cookie": [],
+          "body": "{\n  \"message\": \"Sesi kamu sudah berakhir. Silakan masuk lagi.\",\n  \"errors\": [],\n  \"code\": \"session_expired\"\n}"
+        }
+      ]
     },
     {
       "name": "6 Terapkan rencana (bulk sesi)",
@@ -105,7 +153,23 @@
           "mode": "raw",
           "raw": "{\n  \"sesi\": [\n    {\n      \"task_id\": 1,\n      \"course_id\": 1,\n      \"mulai\": \"2026-11-02T16:00:00+00:00\",\n      \"selesai\": \"2026-11-02T17:00:00+00:00\",\n      \"sumber\": \"ai\"\n    }\n  ]\n}"
         }
-      }
+      },
+      "response": [
+        {
+          "name": "Sesi kedaluwarsa (contoh)",
+          "originalRequest": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/sessions/bulk", "host": ["{{base_url}}"], "path": ["sessions", "bulk"] }
+          },
+          "status": "Unauthorized",
+          "code": 401,
+          "_postman_previewlanguage": "json",
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "cookie": [],
+          "body": "{\n  \"message\": \"Sesi kamu sudah berakhir. Silakan masuk lagi.\",\n  \"errors\": [],\n  \"code\": \"session_expired\"\n}"
+        }
+      ]
     },
     {
       "name": "7 Ringkas materi (rate limit 10/menit)",
@@ -117,7 +181,23 @@
           "mode": "raw",
           "raw": "{\n  \"teks\": \"Basis data adalah kumpulan data terorganisir yang dikelola sistem manajemen basis data. Model relasional menyimpan data dalam tabel dengan baris dan kolom. Normalisasi mengurangi redundansi dengan memisahkan data ke tabel dengan kunci asing.\"\n}"
         }
-      }
+      },
+      "response": [
+        {
+          "name": "Sesi kedaluwarsa (contoh)",
+          "originalRequest": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/ai/summarize", "host": ["{{base_url}}"], "path": ["ai", "summarize"] }
+          },
+          "status": "Unauthorized",
+          "code": 401,
+          "_postman_previewlanguage": "json",
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "cookie": [],
+          "body": "{\n  \"message\": \"Sesi kamu sudah berakhir. Silakan masuk lagi.\",\n  \"errors\": [],\n  \"code\": \"session_expired\"\n}"
+        }
+      ]
     },
     {
       "name": "8 Daftar sesi",
@@ -125,7 +205,23 @@
         "method": "GET",
         "header": [{ "key": "Accept", "value": "application/json" }],
         "url": { "raw": "{{base_url}}/sessions", "host": ["{{base_url}}"], "path": ["sessions"] }
-      }
+      },
+      "response": [
+        {
+          "name": "Sesi kedaluwarsa (contoh)",
+          "originalRequest": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/sessions", "host": ["{{base_url}}"], "path": ["sessions"] }
+          },
+          "status": "Unauthorized",
+          "code": 401,
+          "_postman_previewlanguage": "json",
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "cookie": [],
+          "body": "{\n  \"message\": \"Sesi kamu sudah berakhir. Silakan masuk lagi.\",\n  \"errors\": [],\n  \"code\": \"session_expired\"\n}"
+        }
+      ]
     },
     {
       "name": "9 Keluar",
@@ -133,7 +229,23 @@
         "method": "POST",
         "header": [{ "key": "Accept", "value": "application/json" }],
         "url": { "raw": "{{base_url}}/auth/logout", "host": ["{{base_url}}"], "path": ["auth", "logout"] }
-      }
+      },
+      "response": [
+        {
+          "name": "Sesi kedaluwarsa (contoh)",
+          "originalRequest": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/auth/logout", "host": ["{{base_url}}"], "path": ["auth", "logout"] }
+          },
+          "status": "Unauthorized",
+          "code": 401,
+          "_postman_previewlanguage": "json",
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "cookie": [],
+          "body": "{\n  \"message\": \"Sesi kamu sudah berakhir. Silakan masuk lagi.\",\n  \"errors\": [],\n  \"code\": \"session_expired\"\n}"
+        }
+      ]
     }
   ]
 }

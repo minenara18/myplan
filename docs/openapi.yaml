@@ -1,7 +1,15 @@
 openapi: 3.0.3
 info:
   title: AI Study Planner API
-  description: API Laravel 12 + Sanctum untuk aplikasi perencana belajar mahasiswa. Semua respons dibungkus {"data": ...}; kesalahan seragam {message, errors, code}. Kode kegagalan: VALIDASI_GAGAL, TIDAK_TERAUTENTIKASI, OTORISASI_GAGAL, TIDAK_ADA, KESALAHAN_SERVER, AI_GAGAL (502).
+  description: >-
+    API Laravel 12 + Sanctum untuk aplikasi perencana belajar mahasiswa. Semua
+    respons dibungkus {"data": ...}; kesalahan seragam {message, errors, code}.
+    Kode kegagalan: VALIDASI_GAGAL, TIDAK_TERAUTENTIKASI, session_expired
+    (sesi kedaluwarsa sisi masa idle), OTORISASI_GAGAL, TIDAK_ADA,
+    KESALAHAN_SERVER, AI_GAGAL (502). Token berlaku 60 hari; tiap request
+    terautentikasi memperpanjang masa berlaku ke "sekarang + 60 hari"
+    (maksimal sekali per jam); lewat 60 hari tanpa dibuka menghasilkan 401
+    code session_expired.
   version: 1.0.0
 servers:
   - url: http://10.0.2.2:8000/api
@@ -54,6 +62,7 @@ paths:
       summary: Keluar (token dicabut)
       responses:
         '200': { description: 'Berhasil keluar' }
+        '401': { $ref: '#/components/responses/TidakTerautentikasi' }
   /me:
     get:
       summary: Profil pengguna aktif
@@ -71,25 +80,30 @@ paths:
                       id: { type: string }
                       name: { type: string }
                       email: { type: string, format: email }
+        '401': { $ref: '#/components/responses/SesiKedaluwarsa' }
   /settings:
     get:
       summary: Pengaturan pengguna
       responses:
         '200': { description: OK }
+        '401': { $ref: '#/components/responses/TidakTerautentikasi' }
     put:
       summary: Perbarui pengaturan
       responses:
         '200': { description: OK }
+        '401': { $ref: '#/components/responses/TidakTerautentikasi' }
   /stats/weekly:
     get:
       summary: Statistik belajar mingguan
       responses:
         '200': { description: OK }
+        '401': { $ref: '#/components/responses/TidakTerautentikasi' }
   /courses:
     get:
       summary: Daftar mata kuliah milik pengguna
       responses:
         '200': { description: OK }
+        '401': { $ref: '#/components/responses/TidakTerautentikasi' }
     post:
       summary: Buat mata kuliah
       requestBody:
@@ -104,28 +118,33 @@ paths:
                 warna_index: { type: integer }
       responses:
         '201': { description: Dibuat }
+        '401': { $ref: '#/components/responses/TidakTerautentikasi' }
   /courses/{course}:
     get:
       summary: Detail mata kuliah
       parameters: [{ $ref: '#/components/parameters/IdPath' }]
       responses:
         '200': { description: OK }
+        '401': { $ref: '#/components/responses/TidakTerautentikasi' }
         '404': { $ref: '#/components/responses/TidakAda' }
     put:
       summary: Perbarui mata kuliah
       parameters: [{ $ref: '#/components/parameters/IdPath' }]
       responses:
         '200': { description: OK }
+        '401': { $ref: '#/components/responses/TidakTerautentikasi' }
     delete:
       summary: Hapus mata kuliah
       parameters: [{ $ref: '#/components/parameters/IdPath' }]
       responses:
         '204': { description: 'Tanpa isi' }
+        '401': { $ref: '#/components/responses/TidakTerautentikasi' }
   /tasks:
     get:
       summary: Daftar tugas
       responses:
         '200': { description: OK }
+        '401': { $ref: '#/components/responses/TidakTerautentikasi' }
     post:
       summary: Buat tugas
       requestBody:
@@ -135,12 +154,14 @@ paths:
             schema: { $ref: '#/components/schemas/TugasInput' }
       responses:
         '201': { description: Dibuat }
+        '401': { $ref: '#/components/responses/TidakTerautentikasi' }
   /tasks/{task}:
     get:
       summary: Detail tugas
       parameters: [{ $ref: '#/components/parameters/IdPath' }]
       responses:
         '200': { description: OK }
+        '401': { $ref: '#/components/responses/TidakTerautentikasi' }
         '404': { $ref: '#/components/responses/TidakAda' }
     put:
       summary: Perbarui tugas
@@ -151,11 +172,13 @@ paths:
             schema: { $ref: '#/components/schemas/TugasInput' }
       responses:
         '200': { description: OK }
+        '401': { $ref: '#/components/responses/TidakTerautentikasi' }
     delete:
       summary: Hapus tugas
       parameters: [{ $ref: '#/components/parameters/IdPath' }]
       responses:
         '204': { description: 'Tanpa isi' }
+        '401': { $ref: '#/components/responses/TidakTerautentikasi' }
   /sessions:
     get:
       summary: Daftar sesi studi (filter course_id, mulai, sampai)
@@ -165,6 +188,7 @@ paths:
         - { name: sampai, in: query, schema: { type: string, format: date } }
       responses:
         '200': { description: OK }
+        '401': { $ref: '#/components/responses/TidakTerautentikasi' }
     post:
       summary: Buat satu sesi studi
       requestBody:
@@ -174,6 +198,7 @@ paths:
             schema: { $ref: '#/components/schemas/SesiInput' }
       responses:
         '201': { description: Dibuat }
+        '401': { $ref: '#/components/responses/TidakTerautentikasi' }
   /sessions/bulk:
     post:
       summary: Simpan banyak sesi sekaligus (dipakai tombol Terapkan dari AI)
@@ -192,6 +217,7 @@ paths:
                   items: { $ref: '#/components/schemas/SesiInput' }
       responses:
         '201': { description: Dibuat }
+        '401': { $ref: '#/components/responses/TidakTerautentikasi' }
         '422': { $ref: '#/components/responses/ValidasiGagal' }
   /sessions/{session}:
     get:
@@ -199,31 +225,37 @@ paths:
       parameters: [{ $ref: '#/components/parameters/IdPath' }]
       responses:
         '200': { description: OK }
+        '401': { $ref: '#/components/responses/TidakTerautentikasi' }
     put:
       summary: Perbarui sesi
       parameters: [{ $ref: '#/components/parameters/IdPath' }]
       responses:
         '200': { description: OK }
+        '401': { $ref: '#/components/responses/TidakTerautentikasi' }
     delete:
       summary: Hapus sesi
       parameters: [{ $ref: '#/components/parameters/IdPath' }]
       responses:
         '204': { description: 'Tanpa isi' }
+        '401': { $ref: '#/components/responses/TidakTerautentikasi' }
   /focus-records:
     get:
       summary: Daftar rekaman fokus
       responses:
         '200': { description: OK }
+        '401': { $ref: '#/components/responses/TidakTerautentikasi' }
     post:
       summary: Simpan rekaman fokus
       responses:
         '201': { description: Dibuat }
+        '401': { $ref: '#/components/responses/TidakTerautentikasi' }
   /focus-records/{record}:
     delete:
       summary: Hapus rekaman fokus
       parameters: [{ $ref: '#/components/parameters/IdPath' }]
       responses:
         '204': { description: 'Tanpa isi' }
+        '401': { $ref: '#/components/responses/TidakTerautentikasi' }
   /ai/plan:
     post:
       summary: Susun rencana belajar (LLM dengan fallback deterministik)
@@ -333,6 +365,11 @@ components:
     bearerAuth:
       type: http
       scheme: bearer
+      description: >-
+        Token dari /auth/register atau /auth/login ("{id}|{string}"), berlaku
+        60 hari dan diperpanjang otomatis pada setiap request terautentikasi
+        (throttle penulisan 60 menit per token). 401 sesi kedaluwarsa
+        dipisahkan lewat code "session_expired".
   parameters:
     IdPath:
       name: id
@@ -346,7 +383,17 @@ components:
         application/json:
           schema: { $ref: '#/components/schemas/CarafulError' }
     TidakTerautentikasi:
-      description: 'Belum masuk (401)'
+      description: >-
+        Gagal autentikasi (401). Token tidak dikirim atau tidak dikenal ->
+        code TIDAK_TERAUTENTIKASI; token terdaftar tapi expires_at lewat ->
+        code session_expired (lihat juga SesiKedaluwarsa).
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/CarafulError' }
+    SesiKedaluwarsa:
+      description: >-
+        Token ada di DB tapi expires_at sudah lewat (401, code
+        session_expired) — aplikasi meminta login ulang.
       content:
         application/json:
           schema: { $ref: '#/components/schemas/CarafulError' }
