@@ -177,6 +177,8 @@ class AppLocalizations {
     'DistribusiMataPelajaran': 'Distribusi Waktu per Mata Pelajaran',
     'StreakDays': 'hari',
     'EmptyHome': 'Mulai dengan menambahkan tugas atau sesi belajar.',
+    'SesiKedaluwarsa':
+        'Sesi kamu sudah berakhir. Silakan masuk lagi untuk melanjutkan.',
   };
 
   static const LocalizationsDelegate<AppLocalizations> delegate =
