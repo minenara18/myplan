@@ -1,5 +1,6 @@
 import 'package:ai_study_planner/core/clock.dart';
 import 'package:ai_study_planner/services/onboarding_preferences_service.dart';
+import 'package:ai_study_planner/services/session_store.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Status autentikasi.
@@ -57,14 +58,18 @@ abstract class AuthRepository {
 }
 
 /// Implementasi palsu dari AuthRepository.
+/// [sessionStore] adalah jalur tunggal penyimpanan sesi; token fake yang
+/// tersimpan membuat alur "login -> buka ulang -> langsung dashboard" bekerja.
 class FakeAuthRepository implements AuthRepository {
   FakeAuthRepository({
     required this.clock,
     required this.onboardingService,
-  });
+    SessionStore? sessionStore,
+  })  : sessionStore = sessionStore ?? InMemorySessionStore();
 
   final Clock clock;
   final OnboardingPreferencesService onboardingService;
+  final SessionStore sessionStore;
 
   bool _isLoggedIn = false;
   String? _errorMessage;
@@ -88,6 +93,9 @@ class FakeAuthRepository implements AuthRepository {
       return;
     }
     _isLoggedIn = true;
+    final now = clock.now();
+    await sessionStore.catatLogin(email: email, at: now);
+    await sessionStore.simpanSesi(token: 'fake-token', lastActiveAt: now);
   }
 
   @override
@@ -103,6 +111,9 @@ class FakeAuthRepository implements AuthRepository {
       return;
     }
     _isLoggedIn = true;
+    final now = clock.now();
+    await sessionStore.catatLogin(email: email, at: now);
+    await sessionStore.simpanSesi(token: 'fake-token', lastActiveAt: now);
   }
 
   @override
@@ -116,6 +127,8 @@ class FakeAuthRepository implements AuthRepository {
   @override
   Future<void> logout() async {
     _isLoggedIn = false;
+    // Sesi dihapus; email terakhir dipertahankan oleh SessionStore.
+    await sessionStore.hapusSesi();
   }
 
   @override

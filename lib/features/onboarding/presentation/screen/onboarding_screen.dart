@@ -82,9 +82,10 @@ class OnboardingScreen extends ConsumerWidget {
                     child: ElevatedButton.icon(
                       onPressed: () {
                         if (state.currentPage == slides.length - 1) {
-                          // Suntikan routing: tandai selesai lalu menuju beranda.
+                          // Suntikan routing: tandai selesai, keeper akan
+                          // mengarahkan login, layar pindah ke /login.
                           onSelesai?.call();
-                          context.go(AppRoutes.beranda);
+                          context.go(AppRoutes.login);
                         } else {
                           notifier.nextPage(slides.length);
                         }

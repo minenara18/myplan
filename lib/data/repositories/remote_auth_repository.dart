@@ -1,16 +1,28 @@
 import 'package:dio/dio.dart';
 
+import 'package:ai_study_planner/core/clock.dart';
+import 'package:ai_study_planner/core/system_clock.dart';
 import 'package:ai_study_planner/core/failure.dart';
 import 'package:ai_study_planner/data/api/api_client.dart';
 import 'package:ai_study_planner/data/api/failure_mapper.dart';
 import 'package:ai_study_planner/data/repositories/auth_repository.dart';
+import 'package:ai_study_planner/services/session_store.dart';
 
 /// Implementasi remote dari AuthRepository melalui ApiClient.
-/// Token disimpan di flutter_secure_storage lewat TokenStorage.
+/// Token disimpan di flutter_secure_storage lewat TokenStorage; email
+/// terakhir dan keaktifan dicatat di SessionStore agar sesi 60 hari bisa
+/// dievaluasi offline oleh policy saat aplikasi dibuka lagi.
 class RemoteAuthRepository implements AuthRepository {
-  RemoteAuthRepository(this.apiClient);
+  RemoteAuthRepository(
+    this.apiClient, {
+    SessionStore? sessionStore,
+    Clock? clock,
+  })  : sessionStore = sessionStore ?? InMemorySessionStore(),
+        clock = clock ?? const SystemClock();
 
   final ApiClient apiClient;
+  final SessionStore sessionStore;
+  final Clock clock;
   static const _failureMapper = FailureMapper();
 
   @override
@@ -33,7 +45,7 @@ class RemoteAuthRepository implements AuthRepository {
         '/auth/login',
         data: {'email': email, 'password': password},
       );
-      await _extractAndSaveToken(response);
+      await _extractAndSaveToken(response, email);
     } on DioException catch (e) {
       throw _failureMapper.fromDio(e);
     }
@@ -46,7 +58,7 @@ class RemoteAuthRepository implements AuthRepository {
         '/auth/register',
         data: {'email': email, 'password': password},
       );
-      await _extractAndSaveToken(response);
+      await _extractAndSaveToken(response, email);
     } on DioException catch (e) {
       throw _failureMapper.fromDio(e);
     }
@@ -81,8 +93,12 @@ class RemoteAuthRepository implements AuthRepository {
     );
   }
 
-  /// Ambil token dari respons {token: ..., user: {...}} dan simpan.
-  Future<void> _extractAndSaveToken(Response<Object?> response) async {
+  /// Ambil token dari respons {token: ..., user: {...}} dan simpan,
+  /// lalu catat email terakhir + keaktifan di SessionStore.
+  Future<void> _extractAndSaveToken(
+    Response<Object?> response,
+    String email,
+  ) async {
     final body = response.data;
     if (body is! Map<String, dynamic>) {
       throw const UnknownFailure('Respons dari server tidak valid.');
@@ -92,5 +108,8 @@ class RemoteAuthRepository implements AuthRepository {
       throw const UnknownFailure('Token tidak diterima dari server.');
     }
     await apiClient.saveToken(token);
+    final now = clock.now();
+    await sessionStore.catatLogin(email: email, at: now);
+    await sessionStore.simpanSesi(token: token, lastActiveAt: now);
   }
 }
