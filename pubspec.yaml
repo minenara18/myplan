@@ -22,6 +22,10 @@ dependencies:
   equatable: ^2.0.5
 
 dev_dependencies:
+  # Dibutuhkan integration_test/alur_rencana_ai_test.dart (paket dari SDK Flutter,
+  # bukan paket pihak ketiga).
+  integration_test:
+    sdk: flutter
   very_good_analysis: ^5.1.0
   flutter_test:
     sdk: flutter
