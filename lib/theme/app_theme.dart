@@ -45,6 +45,7 @@ final class AppTheme {
   static const Duration shortDur = Duration(milliseconds: 150);
   static const Duration mediumDur = Duration(milliseconds: 200);
   static const Duration longDur = Duration(milliseconds: 300);
+  static const Duration splashAnimDur = Duration(milliseconds: 600);
 
   // Bayangan kaca: Moonstone 15% - warna konstan
   static const Color glassShadowColor = Color(0xFF4C9DB0);
