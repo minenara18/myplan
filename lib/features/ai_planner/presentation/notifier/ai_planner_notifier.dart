@@ -57,12 +57,20 @@ final class AiPlannerReady extends AiPlannerState {
 
 /// Menyimpan semua sesi ke kalender.
 final class AiPlannerMenyimpan extends AiPlannerReady {
-  AiPlannerMenyimpan({required super.hasil, required super.tugas, required super.mataKuliah, super.catatan});
+  AiPlannerMenyimpan(
+      {required super.hasil,
+      required super.tugas,
+      required super.mataKuliah,
+      super.catatan});
 }
 
 /// Semua sesi tersimpan lewat satu operasi bulk.
 final class AiPlannerTersimpan extends AiPlannerReady {
-  AiPlannerTersimpan({required super.hasil, required super.tugas, required super.mataKuliah, super.catatan});
+  AiPlannerTersimpan(
+      {required super.hasil,
+      required super.tugas,
+      required super.mataKuliah,
+      super.catatan});
 }
 
 /// Gagal: penyebab dijelaskan; tombol Coba lagi tersedia.
@@ -116,8 +124,10 @@ class AiPlannerNotifier extends ChangeNotifier {
     _state = AiPlannerReady(
       hasil: AiPlanResult(
         sumber: AiPlanSumber.fallback,
-        rentangMulai: DateTime(_clock.now().year, _clock.now().month, _clock.now().day),
-        rentangSampai: DateTime(_clock.now().year, _clock.now().month, _clock.now().day),
+        rentangMulai:
+            DateTime(_clock.now().year, _clock.now().month, _clock.now().day),
+        rentangSampai:
+            DateTime(_clock.now().year, _clock.now().month, _clock.now().day),
         sesi: const [],
         prioritas: const [],
       ),
@@ -276,17 +286,18 @@ class AiPlannerNotifier extends ChangeNotifier {
     String? catatan,
   }) {
     final hariIni = _clock.now();
-    final mulaiFix = mulai ?? DateTime(hariIni.year, hariIni.month, hariIni.day);
-    final sampaiFix =
-        sampai ?? mulaiFix.add(const Duration(days: 6));
+    final mulaiFix =
+        mulai ?? DateTime(hariIni.year, hariIni.month, hariIni.day);
+    final sampaiFix = sampai ?? mulaiFix.add(const Duration(days: 6));
 
     return AiPlanInput(
       mulai: mulaiFix,
       sampai: sampaiFix,
       // Jam jendela diambil dari jam di tanggal yang dipilih, bila ada.
-      jamMulai: jamMulai ?? (mulai != null ? mulai.hour : AiPlanInput.defaultJamMulai),
-      jamSelesai:
-          jamSelesai ?? (sampai != null ? sampai.hour : AiPlanInput.defaultJamSelesai),
+      jamMulai: jamMulai ??
+          (mulai != null ? mulai.hour : AiPlanInput.defaultJamMulai),
+      jamSelesai: jamSelesai ??
+          (sampai != null ? sampai.hour : AiPlanInput.defaultJamSelesai),
       catatan: catatan,
     );
   }
@@ -313,6 +324,6 @@ final aiPlannerNotifierProvider = ChangeNotifierProvider<AiPlannerNotifier>((
     sessionRepository: ref.watch(sessionRepositoryProvider),
     taskRepository: ref.watch(taskRepositoryProvider),
     courseRepository: ref.watch(courseRepositoryProvider),
-    clock: SystemClock(),
+    clock: ref.watch(clockProvider),
   );
 });

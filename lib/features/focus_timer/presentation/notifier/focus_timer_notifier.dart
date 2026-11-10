@@ -72,10 +72,12 @@ class FocusTimerNotifier extends ChangeNotifier {
   }
 
   Future<void> _saveSession() async {
+    final sekarang = _clock.now();
     await _focusRepository.saveFocusRecord(
       FocusRecord(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        mulai: DateTime.now().subtract(Duration(minutes: _state.duration.inMinutes)),
+        id: sekarang.millisecondsSinceEpoch.toString(),
+        mulai: sekarang
+            .subtract(Duration(minutes: _state.duration.inMinutes)),
         durasi: Duration(minutes: _state.duration.inMinutes),
         taskId: _state.relatedTaskId,
       ),

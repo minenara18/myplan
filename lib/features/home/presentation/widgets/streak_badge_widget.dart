@@ -1,5 +1,6 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
+import 'package:ai_study_planner/l10n/app_localizations.dart';
 import 'package:ai_study_planner/theme/color_tokens.dart';
 
 /// Lencana streak berikon api.
@@ -23,10 +24,13 @@ class StreakBadgeWidget extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.local_fire_department, size: 20, color: ColorTokens.vanilla),
+          const Icon(Icons.local_fire_department,
+              size: 20,
+              color: ColorTokens.vanilla,
+              semanticLabel: 'Streak'),
           const SizedBox(width: 8),
           Text(
-            '$streak hari',
+            '$streak ${l10n('StreakDays')}',
             style: TextStyle(
               fontFamily: 'Inter',
               fontSize: 14,

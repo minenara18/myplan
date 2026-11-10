@@ -17,8 +17,8 @@ class ProgressNotifier extends ChangeNotifier {
     required this.taskRepository,
     required this.focusRepository,
     Clock? clock,
-  }) : _clock = clock ?? SystemClock(),
-       _aggregator = const ProgressAggregator();
+  })  : _clock = clock ?? SystemClock(),
+        _aggregator = const ProgressAggregator();
 
   final CourseRepository courseRepository;
   final TaskRepository taskRepository;
@@ -35,6 +35,9 @@ class ProgressNotifier extends ChangeNotifier {
   List<Course> get courses => _courses;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+
+  /// Hari ini dari Clock yang disuntik (bukan DateTime.now() di widget).
+  DateTime get today => _clock.now();
 
   Future<void> load() async {
     _isLoading = true;
@@ -61,15 +64,13 @@ class ProgressNotifier extends ChangeNotifier {
   }
 }
 
-/// Provider ProgressNotifier.
+/// Provider ProgressNotifier; memuat data saat pertama dibaca.
 final progressNotifierProvider =
     ChangeNotifierProvider<ProgressNotifier>((ref) {
-  final courseRepo = ref.watch(courseRepositoryProvider);
-  final taskRepo = ref.watch(taskRepositoryProvider);
-  final focusRepo = ref.watch(focusRepositoryProvider);
   return ProgressNotifier(
-    courseRepository: courseRepo,
-    taskRepository: taskRepo,
-    focusRepository: focusRepo,
-  );
+    courseRepository: ref.watch(courseRepositoryProvider),
+    taskRepository: ref.watch(taskRepositoryProvider),
+    focusRepository: ref.watch(focusRepositoryProvider),
+    clock: ref.watch(clockProvider),
+  )..load();
 });

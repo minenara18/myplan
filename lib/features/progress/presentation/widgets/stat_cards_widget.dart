@@ -1,6 +1,7 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 import 'package:ai_study_planner/core/aggregation.dart';
+import 'package:ai_study_planner/l10n/app_localizations.dart';
 import 'package:ai_study_planner/theme/color_tokens.dart';
 
 /// Tiga kartu kaca statistik: jam belajar, tugas selesai, streak.
@@ -16,8 +17,9 @@ class StatCardsWidget extends StatelessWidget {
         Expanded(
           child: _StatCard(
             icon: Icons.access_time,
-            label: 'Jam Belajar',
-            value: '${(stats?.totalStudyMinutes ?? 0) ~/ 60} jam',
+            label: l10n('JamBelajar'),
+            value:
+                '${(stats?.totalStudyMinutes ?? 0) ~/ 60} ${l10n('HourUnit')}',
             color: ColorTokens.moonstone,
           ),
         ),
@@ -25,7 +27,7 @@ class StatCardsWidget extends StatelessWidget {
         Expanded(
           child: _StatCard(
             icon: Icons.check_circle,
-            label: 'Tugas Selesai',
+            label: l10n('TugasSelesai'),
             value: '${stats?.completedTasks ?? 0} / ${stats?.totalTasks ?? 0}',
             color: ColorTokens.moonstoneTint,
           ),
@@ -34,8 +36,8 @@ class StatCardsWidget extends StatelessWidget {
         Expanded(
           child: _StatCard(
             icon: Icons.local_fire_department,
-            label: 'Streak',
-            value: '${stats?.streak ?? 0} hari',
+            label: l10n('Streak'),
+            value: '${stats?.streak ?? 0} ${l10n('StreakDays')}',
             color: ColorTokens.vanilla,
           ),
         ),
@@ -62,7 +64,7 @@ class _StatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.7),
+        color: ColorTokens.white.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: color.withValues(alpha: 0.3),

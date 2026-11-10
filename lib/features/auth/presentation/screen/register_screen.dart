@@ -1,26 +1,51 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-import 'package:ai_study_planner/l10n/app_localizations.dart';
-import 'package:ai_study_planner/theme/components/ambient_background.dart';
-import 'package:ai_study_planner/theme/components/glass_card.dart';
-import 'package:ai_study_planner/theme/color_tokens.dart';
 import 'package:ai_study_planner/features/auth/presentation/notifier/auth_notifier.dart';
 import 'package:ai_study_planner/features/auth/presentation/widgets/auth_form_field.dart';
 import 'package:ai_study_planner/features/auth/presentation/widgets/google_button.dart';
+import 'package:ai_study_planner/l10n/app_localizations.dart';
+import 'package:ai_study_planner/routing/routes.dart';
+import 'package:ai_study_planner/theme/color_tokens.dart';
+import 'package:ai_study_planner/theme/components/ambient_background.dart';
+import 'package:ai_study_planner/theme/components/glass_card.dart';
 
 /// Layar daftar sebagai GlassCard di tengah dengan lingkaran blur di belakangnya.
-class RegisterScreen extends ConsumerWidget {
+class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends ConsumerState<RegisterScreen> {
+  // Controller dibuat sekali di initState dan selalu di-dispose
+  // (sebelumnya dibuat di build sehingga bocor di tiap rebuild).
+  late final TextEditingController _emailController;
+  late final TextEditingController _passwordController;
+  late final TextEditingController _confirmPasswordController;
+
+  @override
+  void initState() {
+    super.initState();
+    _emailController = TextEditingController();
+    _passwordController = TextEditingController();
+    _confirmPasswordController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final notifier = ref.read(authNotifierProvider.notifier);
     final authState = ref.watch(authNotifierProvider);
-
-    final emailController = TextEditingController();
-    final passwordController = TextEditingController();
-    final confirmPasswordController = TextEditingController();
 
     return Scaffold(
       body: Stack(
@@ -39,10 +64,13 @@ class RegisterScreen extends ConsumerWidget {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Icon(Icons.person_add, size: 48, color: ColorTokens.moonstone),
+                        const Icon(Icons.person_add,
+                            size: 48,
+                            color: ColorTokens.moonstone,
+                            semanticLabel: 'Daftar'),
                         const SizedBox(height: 24),
                         Text(
-                          AppLocalizations.messages['Register'] ?? 'Daftar',
+                          l10n('Register'),
                           style: TextStyle(
                             fontFamily: 'DM Serif Display',
                             fontSize: 32,
@@ -52,7 +80,7 @@ class RegisterScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Buat akun baru untuk memulai',
+                          l10n('BuatAkunBaru'),
                           style: TextStyle(
                             fontFamily: 'Inter',
                             fontSize: 14,
@@ -62,48 +90,48 @@ class RegisterScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 32),
                         AuthFormField(
-                          controller: emailController,
-                          label: 'Email',
+                          controller: _emailController,
+                          label: l10n('Email'),
                           icon: Icons.email,
                           keyboardType: TextInputType.emailAddress,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Email tidak boleh kosong.';
+                              return l10n('EmailKosong');
                             }
                             if (!value.contains('@')) {
-                              return 'Masukkan email yang valid.';
+                              return l10n('EmailTidakValid');
                             }
                             return null;
                           },
                         ),
                         const SizedBox(height: 16),
                         AuthFormField(
-                          controller: passwordController,
-                          label: 'Sandi',
+                          controller: _passwordController,
+                          label: l10n('Sandi'),
                           icon: Icons.lock,
                           isPassword: true,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Sandi tidak boleh kosong.';
+                              return l10n('SandiKosong');
                             }
                             if (value.length < 6) {
-                              return 'Sandi minimal 6 karakter.';
+                              return l10n('SandiMinimalEnam');
                             }
                             return null;
                           },
                         ),
                         const SizedBox(height: 16),
                         AuthFormField(
-                          controller: confirmPasswordController,
-                          label: 'Konfirmasi Sandi',
+                          controller: _confirmPasswordController,
+                          label: l10n('KonfirmasiSandi'),
                           icon: Icons.lock_outline,
                           isPassword: true,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Konfirmasi sandi tidak boleh kosong.';
+                              return l10n('KonfirmasiKosong');
                             }
-                            if (value != passwordController.text) {
-                              return 'Sandi tidak cocok.';
+                            if (value != _passwordController.text) {
+                              return l10n('SandiTidakCocok');
                             }
                             return null;
                           },
@@ -113,26 +141,28 @@ class RegisterScreen extends ConsumerWidget {
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFBA1A1A).withValues(alpha: 0.1),
+                              color:
+                                  ColorTokens.error.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
                               authState.errorMessage!,
                               style: const TextStyle(
-                                color: Color(0xFFBA1A1A),
+                                color: ColorTokens.error,
                                 fontSize: 12,
                               ),
                             ),
                           ),
                         const SizedBox(height: 24),
-                        SizedBox(
-                          height: 48,
+                        ConstrainedBox(
+                          constraints:
+                              const BoxConstraints(minHeight: 48),
                           child: ElevatedButton(
                             onPressed: authState.isLoading
                                 ? null
                                 : () => notifier.register(
-                                      emailController.text,
-                                      passwordController.text,
+                                      _emailController.text,
+                                      _passwordController.text,
                                     ),
                             child: authState.isLoading
                                 ? const SizedBox(
@@ -142,7 +172,7 @@ class RegisterScreen extends ConsumerWidget {
                                       strokeWidth: 2,
                                     ),
                                   )
-                                : const Text('Daftar'),
+                                : Text(l10n('Register')),
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -150,11 +180,10 @@ class RegisterScreen extends ConsumerWidget {
                           onPressed: () => notifier.loginWithGoogle(),
                         ),
                         const SizedBox(height: 16),
+                        // Ke /login lewat GoRouter (sebelumnya TODO tak berfungsi).
                         TextButton(
-                          onPressed: () {
-                            // TODO: navigate to login
-                          },
-                          child: const Text('Sudah punya akun? Masuk'),
+                          onPressed: () => context.go(AppRoutes.login),
+                          child: Text(l10n('SudahPunyaAkun')),
                         ),
                       ],
                     ),

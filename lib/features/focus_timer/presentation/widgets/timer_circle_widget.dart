@@ -1,5 +1,6 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
+import 'package:ai_study_planner/l10n/app_localizations.dart';
 import 'package:ai_study_planner/theme/color_tokens.dart';
 
 /// Lingkaran besar Moonstone dengan trek Vanilla.
@@ -17,59 +18,67 @@ class TimerCircleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final progress = totalSeconds > 0
-        ? remainingSeconds / totalSeconds
-        : 0.0;
+    final progress = totalSeconds > 0 ? remainingSeconds / totalSeconds : 0.0;
+
+    // Lingkaran tumbuh mengikuti skala teks: angka besar "25:00" dengan
+    // huruf 48 selalu muat di dalam lingkaran, tanpa potongan teks,
+    // pada skala teks besar (mis. 2.0). Batas atas mengikuti batas skala.
+    final textScale = MediaQuery.textScalerOf(context).scale(1.0);
+    final dialSize = 260.0 * textScale;
+    final dialBorder = 12.0 * textScale;
+    final dialInner = 210.0 * textScale;
 
     return SizedBox(
-      width: 260,
-      height: 260,
+      width: dialSize,
+      height: dialSize,
       child: Stack(
         alignment: Alignment.center,
         children: [
           // Trek Vanilla (lingkaran penuh)
           Container(
-            width: 260,
-            height: 260,
+            width: dialSize,
+            height: dialSize,
             decoration: BoxDecoration(
               color: ColorTokens.vanilla.withValues(alpha: 0.2),
               shape: BoxShape.circle,
               border: Border.all(
                 color: ColorTokens.vanilla,
-                width: 12,
+                width: dialBorder,
               ),
             ),
           ),
           // Lingkaran progres Moonstone
           ClipOval(
             child: Container(
-              width: 260,
-              height: 260,
+              width: dialSize,
+              height: dialSize,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.6),
+                color: ColorTokens.white.withValues(alpha: 0.6),
                 border: Border.all(
                   color: ColorTokens.moonstone,
-                  width: 12,
+                  width: dialBorder,
                 ),
               ),
               child: Align(
                 alignment: Alignment.center,
                 child: SizedBox(
-                  width: 210,
-                  height: 210,
+                  width: dialInner,
+                  height: dialInner,
                   child: CircularProgressIndicator(
                     value: progress,
                     strokeWidth: 12,
-                    backgroundColor: Colors.transparent,
+                    backgroundColor: ColorTokens.transparent,
                     color: ColorTokens.moonstone,
                   ),
                 ),
               ),
             ),
           ),
-          // Teks waktu di tengah
+          // Teks waktu di tengah; tinggi kolom mengikuti
+          // lingkaran yang ikut tumbuh pada skala teks besar.
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 '${(remainingSeconds ~/ 60).toString().padLeft(2, '0')}:${(remainingSeconds % 60).toString().padLeft(2, '0')}',
@@ -82,7 +91,7 @@ class TimerCircleWidget extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                isRunning ? 'Berjalan' : 'Siap',
+                isRunning ? l10n('Berjalan') : l10n('Siap'),
                 style: TextStyle(
                   fontFamily: 'Inter',
                   fontSize: 12,

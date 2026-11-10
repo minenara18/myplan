@@ -1,8 +1,9 @@
-﻿import 'package:fl_chart/fl_chart.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 import 'package:ai_study_planner/core/aggregation.dart';
 import 'package:ai_study_planner/core/models/course.dart';
+import 'package:ai_study_planner/l10n/app_localizations.dart';
 import 'package:ai_study_planner/theme/color_tokens.dart';
 
 /// Donut distribusi waktu per mata pelajaran.
@@ -24,7 +25,7 @@ class DonutChartWidget extends StatelessWidget {
       return Container(
         height: 200,
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.7),
+          color: ColorTokens.white.withValues(alpha: 0.7),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: ColorTokens.moonstone.withValues(alpha: 0.2),
@@ -32,9 +33,9 @@ class DonutChartWidget extends StatelessWidget {
           ),
         ),
         child: Semantics(
-          label: 'Belum ada data distribusi waktu per mata pelajaran',
+          label: l10n('BelumAdaDistribusi'),
           child: Center(
-            child: Text('Belum ada data distribusi'),
+            child: Text(l10n('BelumAdaDistribusi')),
           ),
         ),
       );
@@ -71,7 +72,7 @@ class DonutChartWidget extends StatelessWidget {
         radius: 80,
         titleStyle: const TextStyle(
           fontSize: 10,
-          color: Colors.white,
+          color: ColorTokens.white,
           fontWeight: FontWeight.bold,
         ),
       );
@@ -80,7 +81,8 @@ class DonutChartWidget extends StatelessWidget {
     final totalMinutes = timeByCourse.values.fold<int>(0, (sum, v) => sum + v);
 
     return Semantics(
-      label: 'Donut distribusi waktu belajar per mata pelajaran, total $totalMinutes menit',
+      label:
+          'Donut distribusi waktu belajar per mata pelajaran, total $totalMinutes menit',
       child: SizedBox(
         height: 220,
         child: Column(

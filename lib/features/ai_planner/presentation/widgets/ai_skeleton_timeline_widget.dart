@@ -87,7 +87,7 @@ class _SkeletonKartu extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.7),
+        color: ColorTokens.white.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(AppTheme.radiusLg),
         border: Border.all(color: ColorTokens.moonstone.withValues(alpha: 0.2)),
       ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:ai_study_planner/core/aggregation.dart';
+import 'package:ai_study_planner/l10n/app_localizations.dart';
 import 'package:ai_study_planner/theme/components/error_retry_card.dart';
 import 'package:ai_study_planner/theme/color_tokens.dart';
 import 'package:ai_study_planner/features/progress/presentation/notifier/progress_notifier.dart';
@@ -24,69 +25,78 @@ class ProgressScreen extends ConsumerWidget {
     } else if (notifier.errorMessage != null) {
       body = ErrorRetryCard(
         message: notifier.errorMessage!,
-        onRetry: () {
-          notifier.load();
-        },
+        onRetry: notifier.load,
       );
     } else {
-      body = _progressBody(stats, notifier);
+      body = _ProgressBody(stats: stats, notifier: notifier);
     }
 
     return Scaffold(
       body: SafeArea(child: body),
     );
   }
+}
 
-  Widget _progressBody(ProgressStats? stats, ProgressNotifier notifier) {
+class _ProgressBody extends StatelessWidget {
+  const _ProgressBody({required this.stats, required this.notifier});
+
+  final ProgressStats? stats;
+  final ProgressNotifier notifier;
+
+  @override
+  Widget build(BuildContext context) {
     return SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 16),
-              Text(
-                'Progress Belajar',
-                style: TextStyle(
-                  fontFamily: 'DM Serif Display',
-                  fontSize: 32,
-                  color: ColorTokens.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Bar chart mingguan
-              Text(
-                'Aktivitas Minggu Ini',
-                style: TextStyle(
-                  fontFamily: 'DM Serif Display',
-                  fontSize: 20,
-                  color: ColorTokens.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 16),
-              WeeklyBarChartWidget(stats: stats),
-              const SizedBox(height: 24),
-
-              // 3 kartu statistik
-              StatCardsWidget(stats: stats),
-              const SizedBox(height: 24),
-
-              // Donut distribusi per mata pelajaran
-              Text(
-                'Distribusi Waktu per Mata Pelajaran',
-                style: TextStyle(
-                  fontFamily: 'DM Serif Display',
-                  fontSize: 20,
-                  color: ColorTokens.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 16),
-              DonutChartWidget(
-                stats: stats,
-                courses: notifier.courses,
-              ),
-            ],
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 16),
+          Text(
+            l10n('ProgressBelajar'),
+            style: TextStyle(
+              fontFamily: 'DM Serif Display',
+              fontSize: 32,
+              color: ColorTokens.textPrimary,
+            ),
           ),
-        );
+          const SizedBox(height: 24),
+
+          // Bar chart mingguan
+          Text(
+            l10n('AktivitasMingguIni'),
+            style: TextStyle(
+              fontFamily: 'DM Serif Display',
+              fontSize: 20,
+              color: ColorTokens.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          WeeklyBarChartWidget(
+            stats: stats,
+            hariIni: notifier.today,
+          ),
+          const SizedBox(height: 24),
+
+          // 3 kartu statistik
+          StatCardsWidget(stats: stats),
+          const SizedBox(height: 24),
+
+          // Donut distribusi per mata pelajaran
+          Text(
+            l10n('DistribusiMataPelajaran'),
+            style: TextStyle(
+              fontFamily: 'DM Serif Display',
+              fontSize: 20,
+              color: ColorTokens.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          DonutChartWidget(
+            stats: stats,
+            courses: notifier.courses,
+          ),
+        ],
+      ),
+    );
   }
 }

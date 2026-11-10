@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 import 'package:ai_study_planner/theme/color_tokens.dart';
 
@@ -8,12 +8,16 @@ class SettingsItemWidget extends StatelessWidget {
     super.key,
     required this.icon,
     required this.label,
+    this.iconLabel,
     this.trailing,
     this.onTap,
   });
 
   final IconData icon;
   final String label;
+
+  /// Label Semantics untuk ikon bulat (pelengkap label utama).
+  final String? iconLabel;
   final Widget? trailing;
   final VoidCallback? onTap;
 
@@ -22,7 +26,7 @@ class SettingsItemWidget extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.7),
+        color: ColorTokens.white.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: ColorTokens.moonstone.withValues(alpha: 0.2),
@@ -38,10 +42,18 @@ class SettingsItemWidget extends StatelessWidget {
             color: ColorTokens.moonstone.withValues(alpha: 0.15),
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, size: 20, color: ColorTokens.moonstone),
+          child: Icon(
+            icon,
+            size: 20,
+            color: ColorTokens.moonstone,
+            // Ikon dekoratif di samping teks label; tetap diberi label agar
+            // layar berbunyi menerangkan konteks item.
+            semanticLabel: iconLabel ?? label,
+          ),
         ),
         title: Text(
           label,
+          maxLines: 2,
           style: TextStyle(
             fontFamily: 'Inter',
             fontSize: 14,
@@ -49,9 +61,22 @@ class SettingsItemWidget extends StatelessWidget {
             color: ColorTokens.textPrimary,
           ),
         ),
-        trailing: trailing ?? const Icon(Icons.chevron_right, color: ColorTokens.textSecondary),
+        trailing: trailing ?? const _Chevron(),
         onTap: onTap,
       ),
+    );
+  }
+}
+
+class _Chevron extends StatelessWidget {
+  const _Chevron();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Icon(
+      Icons.chevron_right,
+      color: ColorTokens.textSecondary,
+      semanticLabel: 'Buka detail',
     );
   }
 }

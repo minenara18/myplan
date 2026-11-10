@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:ai_study_planner/l10n/app_localizations.dart';
 import 'package:ai_study_planner/theme/app_theme.dart';
 import 'package:ai_study_planner/theme/color_tokens.dart';
 
@@ -22,7 +23,7 @@ class AiInputBarWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.7),
+        color: ColorTokens.white.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(AppTheme.radiusLg),
         border: Border.all(
           color: ColorTokens.moonstone.withValues(alpha: 0.25),
@@ -41,12 +42,12 @@ class AiInputBarWidget extends StatelessWidget {
           // Placeholder mic — rekaman suara hadir di langkah berikutnya.
           IconOnlyPlaceholder(
             icon: Icons.mic_none,
-            label: 'Rekam suara (segera hadir)',
+            label: l10n('RekamSuara'),
             onPencet: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Suara segera hadir'),
-                  duration: Duration(seconds: 1),
+                SnackBar(
+                  content: Text(l10n('SuaraSegera')),
+                  duration: const Duration(seconds: 1),
                 ),
               );
             },
@@ -59,8 +60,8 @@ class AiInputBarWidget extends StatelessWidget {
               textInputAction: TextInputAction.send,
               onSubmitted: (_) => padaKirim(),
               maxLines: 1,
-              decoration: const InputDecoration(
-                hintText: 'Konteks untuk AI, mis.: ujian akhir minggu depan…',
+              decoration: InputDecoration(
+                hintText: l10n('KonteksAI'),
                 border: InputBorder.none,
                 isDense: true,
               ),
@@ -89,7 +90,9 @@ class AiInputBarWidget extends StatelessWidget {
                 ),
                 child: const Icon(
                   Icons.auto_awesome,
-                  color: Colors.white,
+                  // textPrimary di atas moonstone = 4.52:1 (PASS AA),
+                  // putih hanya 3.11:1.
+                  color: ColorTokens.textPrimary,
                   size: 22,
                 ),
               ),

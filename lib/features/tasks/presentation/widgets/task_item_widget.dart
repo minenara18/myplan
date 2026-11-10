@@ -1,6 +1,7 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 import 'package:ai_study_planner/core/models/task.dart';
+import 'package:ai_study_planner/l10n/app_localizations.dart';
 import 'package:ai_study_planner/theme/color_tokens.dart';
 
 /// Item tugas dengan checkbox bulat, ikon tanggal, penanda prioritas.
@@ -25,16 +26,17 @@ class TaskItemWidget extends StatelessWidget {
     return Dismissible(
       key: ValueKey(task.id),
       background: Container(
-        color: Colors.green,
+        color: ColorTokens.success,
         alignment: Alignment.centerLeft,
         padding: const EdgeInsets.only(left: 24),
-        child: const Icon(Icons.check, color: Colors.white),
+        child: const Icon(Icons.check, color: ColorTokens.white, semanticLabel: 'Tandai selesai'),
       ),
       secondaryBackground: Container(
-        color: const Color(0xFFBA1A1A),
+        color: ColorTokens.error,
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 24),
-        child: const Icon(Icons.delete, color: Colors.white),
+        child: const Icon(Icons.delete,
+            color: ColorTokens.white, semanticLabel: 'Hapus tugas'),
       ),
       onDismissed: (direction) {
         if (direction == DismissDirection.startToEnd) {
@@ -48,7 +50,7 @@ class TaskItemWidget extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.7),
+          color: ColorTokens.white.withValues(alpha: 0.7),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: ColorTokens.moonstone.withValues(alpha: 0.2),
@@ -56,25 +58,46 @@ class TaskItemWidget extends StatelessWidget {
           ),
         ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            GestureDetector(
-              key: const Key('task_checkbox'),
-              onTap: onToggle,
-              behavior: HitTestBehavior.opaque,
-              child: Container(
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  color: isCompleted ? ColorTokens.vanilla : Colors.white,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: isCompleted ? ColorTokens.vanilla : ColorTokens.moonstone,
-                    width: 2,
+            // Target sentuh 48px: lingkaran visual tetap 24px, area sentuh 48.
+            Semantics(
+              label:
+                  isCompleted ? 'Tandai belum selesai' : 'Tandai tugas selesai',
+              button: true,
+              child: GestureDetector(
+                key: const Key('task_checkbox'),
+                onTap: onToggle,
+                behavior: HitTestBehavior.opaque,
+                child: SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: Center(
+                    child: Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                      color: isCompleted
+                          ? ColorTokens.vanilla
+                          : ColorTokens.white,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isCompleted
+                              ? ColorTokens.vanilla
+                              : ColorTokens.moonstone,
+                          width: 2,
+                        ),
+                      ),
+                      child: isCompleted
+                          ? const Icon(
+                              Icons.check,
+                              size: 16,
+                              color: ColorTokens.textPrimary,
+                            )
+                          : null,
+                    ),
                   ),
                 ),
-                child: isCompleted
-                    ? const Icon(Icons.check, size: 16, color: ColorTokens.textPrimary)
-                    : null,
               ),
             ),
             const SizedBox(width: 12),
@@ -92,34 +115,49 @@ class TaskItemWidget extends StatelessWidget {
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
                             color: isCompleted
-                                ? ColorTokens.textSecondary.withValues(alpha: 0.6)
+                                ? ColorTokens.textSecondary
                                 : ColorTokens.textPrimary,
                             decoration: isCompleted
                                 ? TextDecoration.lineThrough
                                 : TextDecoration.none,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                          // Judul dibungkus, tidak ada ellipsis: aman pada skala 2.0
+                          // karena kartu bisa tumbuh secara vertikal.
                         ),
                       ),
                       if (task.catatan != null && task.catatan!.isNotEmpty)
-                        Icon(Icons.note, size: 14, color: ColorTokens.moonstone),
+                        const Icon(Icons.note,
+                            size: 14,
+                            color: ColorTokens.moonstone,
+                            semanticLabel: 'Ada catatan'),
                     ],
                   ),
                   const SizedBox(height: 8),
-                  Row(
+                  // Wrap: pada skala teks besar indikator prioritas pindah
+                  // ke baris berikutnya, bukan terpotong di tepi kartu.
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 12,
+                    runSpacing: 4,
                     children: [
-                      Icon(Icons.schedule, size: 14, color: ColorTokens.moonstone),
-                      const SizedBox(width: 4),
-                      Text(
-                        _formatDate(task.tenggat),
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 11,
-                          color: ColorTokens.textSecondary,
-                        ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.schedule,
+                              size: 14,
+                              color: ColorTokens.moonstone,
+                              semanticLabel: 'Tenggat'),
+                          const SizedBox(width: 4),
+                          Text(
+                            _formatDate(task.tenggat),
+                            style: TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 11,
+                              color: ColorTokens.textSecondary,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 12),
                       _PriorityIndicator(priority: task.prioritas),
                     ],
                   ),
@@ -133,8 +171,20 @@ class TaskItemWidget extends StatelessWidget {
   }
 
   String _formatDate(DateTime date) {
-    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-        'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+    final months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'Mei',
+      'Jun',
+      'Jul',
+      'Ags',
+      'Sep',
+      'Okt',
+      'Nov',
+      'Des'
+    ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
 }
@@ -165,15 +215,17 @@ class _PriorityIndicator extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 12, color: color),
+          Icon(icon, size: 14, color: color),
           const SizedBox(width: 4),
           Text(
             _label(priority),
-            style: TextStyle(
+            // Label memakai warna teks token agar kontras AA di atas kaca;
+            // bentuk ikon berbeda memastikan status tidak hanya disangga warna.
+            style: const TextStyle(
               fontFamily: 'Inter',
-              fontSize: 10,
+              fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: color,
+              color: ColorTokens.textSecondary,
             ),
           ),
         ],
@@ -184,11 +236,11 @@ class _PriorityIndicator extends StatelessWidget {
   String _label(Priority p) {
     switch (p) {
       case Priority.tinggi:
-        return 'Tinggi';
+        return l10n('Tinggi');
       case Priority.sedang:
-        return 'Sedang';
+        return l10n('Sedang');
       case Priority.rendah:
-        return 'Rendah';
+        return l10n('Rendah');
     }
   }
 }

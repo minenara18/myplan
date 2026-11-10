@@ -1,6 +1,7 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 import 'package:ai_study_planner/core/models/study_session.dart';
+import 'package:ai_study_planner/l10n/app_localizations.dart';
 import 'package:ai_study_planner/theme/color_tokens.dart';
 
 /// Kartu sesi kaca di timeline vertikal.
@@ -28,7 +29,7 @@ class SessionCardWidget extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.7),
+              color: ColorTokens.white.withValues(alpha: 0.7),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: ColorTokens.moonstone.withValues(alpha: 0.2),
@@ -45,7 +46,10 @@ class SessionCardWidget extends StatelessWidget {
                     color: ColorTokens.moonstone.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.book, size: 20, color: ColorTokens.moonstone),
+                  child: const Icon(Icons.book,
+                      size: 20,
+                      color: ColorTokens.moonstone,
+                      semanticLabel: 'Sesi belajar'),
                 ),
                 const SizedBox(width: 12),
                 // Detail sesi
@@ -54,7 +58,7 @@ class SessionCardWidget extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Sesi Belajar',
+                        l10n('SessionCardTitle'),
                         style: TextStyle(
                           fontFamily: 'Inter',
                           fontSize: 14,
@@ -64,26 +68,22 @@ class SessionCardWidget extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(Icons.access_time, size: 14, color: ColorTokens.moonstone),
+                          const Icon(Icons.access_time,
+                              size: 14, color: ColorTokens.moonstone),
                           const SizedBox(width: 4),
-                          Text(
-                            '${session.mulai.hour}:${session.mulai.minute.toString().padLeft(2, '0')}',
-                            style: TextStyle(
-                              fontFamily: 'Inter',
-                              fontSize: 12,
-                              color: ColorTokens.textSecondary,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Icon(Icons.timer, size: 14, color: ColorTokens.moonstone),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${durasi.inMinutes} menit',
-                            style: TextStyle(
-                              fontFamily: 'Inter',
-                              fontSize: 12,
-                              color: ColorTokens.textSecondary,
+                          Expanded(
+                            child: Text(
+                              // Satu baris 'jam • durasi' lalu membungkus,
+                              // tidak melakukan pemotongan pada skala teks besar.
+                              '${session.mulai.hour}:${session.mulai.minute.toString().padLeft(2, '0')}'
+                              ' • ${durasi.inMinutes} ${l10n('MinuteUnit')}',
+                              style: TextStyle(
+                                fontFamily: 'Inter',
+                                fontSize: 12,
+                                color: ColorTokens.textSecondary,
+                              ),
                             ),
                           ),
                         ],
@@ -93,7 +93,8 @@ class SessionCardWidget extends StatelessWidget {
                 ),
                 // Chip sumber
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: session.sumber == SessionSource.ai
                         ? ColorTokens.vanilla.withValues(alpha: 0.2)
@@ -101,13 +102,13 @@ class SessionCardWidget extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    session.sumber == SessionSource.ai ? 'AI' : 'Manual',
-                    style: TextStyle(
-                      fontSize: 10,
+                    session.sumber == SessionSource.ai
+                        ? l10n('SourceAI')
+                        : l10n('SourceManual'),
+                    style: const TextStyle(
+                      fontSize: 12,
                       fontWeight: FontWeight.w500,
-                      color: session.sumber == SessionSource.ai
-                          ? ColorTokens.vanilla
-                          : ColorTokens.moonstone,
+                      color: ColorTokens.textPrimary,
                     ),
                   ),
                 ),

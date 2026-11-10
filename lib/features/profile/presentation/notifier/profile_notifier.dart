@@ -43,15 +43,9 @@ class ProfileNotifier extends ChangeNotifier {
     _isLoading = false;
     notifyListeners();
   }
-
-  Future<void> logout() async {
-    // TODO: implement logout logic
-  }
 }
 
-/// Provider ProfileNotifier.
-final profileNotifierProvider =
-    ChangeNotifierProvider<ProfileNotifier>((ref) {
-  final repo = ref.watch(settingsRepositoryProvider);
-  return ProfileNotifier(repo);
+/// Provider ProfileNotifier; memuat pengaturan saat pertama dibaca.
+final profileNotifierProvider = ChangeNotifierProvider<ProfileNotifier>((ref) {
+  return ProfileNotifier(ref.watch(settingsRepositoryProvider))..load();
 });

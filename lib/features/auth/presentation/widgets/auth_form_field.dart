@@ -39,11 +39,11 @@ class AuthFormField extends StatelessWidget {
         prefixIcon: Icon(icon, size: 20, color: ColorTokens.moonstone),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFDEE2E6)),
+          borderSide: const BorderSide(color: ColorTokens.outline),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFDEE2E6)),
+          borderSide: const BorderSide(color: ColorTokens.outline),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -51,13 +51,14 @@ class AuthFormField extends StatelessWidget {
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFBA1A1A)),
+          borderSide: const BorderSide(color: ColorTokens.error),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFBA1A1A), width: 2),
+          borderSide: const BorderSide(color: ColorTokens.error, width: 2),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
     );
   }

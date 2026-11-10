@@ -147,9 +147,19 @@ class _AiSheetEditMasukanState extends State<AiSheetEditMasukan> {
       '${hari.day} ${_namaBulan(hari.month)} ${hari.year}';
 
   static String _namaBulan(int bulan) => const [
-    'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-    'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
-  ][bulan - 1];
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'Mei',
+        'Jun',
+        'Jul',
+        'Agu',
+        'Sep',
+        'Okt',
+        'Nov',
+        'Des',
+      ][bulan - 1];
 
   Future<void> _pilihTanggal({required bool pilihMulai}) async {
     final dipilih = await showDatePicker(

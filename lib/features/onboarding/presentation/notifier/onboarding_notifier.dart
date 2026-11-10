@@ -33,4 +33,5 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
 
 /// Provider onboarding notifier.
 final onboardingNotifierProvider =
-    NotifierProvider<OnboardingNotifier, OnboardingState>(OnboardingNotifier.new);
+    NotifierProvider<OnboardingNotifier, OnboardingState>(
+        OnboardingNotifier.new);

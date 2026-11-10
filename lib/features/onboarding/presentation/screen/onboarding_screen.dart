@@ -1,14 +1,20 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import 'package:ai_study_planner/l10n/app_localizations.dart';
+import 'package:ai_study_planner/routing/routes.dart';
 import 'package:ai_study_planner/theme/components/ambient_background.dart';
 import 'package:ai_study_planner/theme/color_tokens.dart';
 import 'package:ai_study_planner/features/onboarding/presentation/notifier/onboarding_notifier.dart';
 import 'package:ai_study_planner/features/onboarding/presentation/widgets/onboarding_slide.dart';
 
 /// Layar onboarding dengan 3 slide, indikator titik, dan tombol lanjut.
+/// [onSelesai] disuntik dari routing agar fitur tidak mengimpor fitur lain.
 class OnboardingScreen extends ConsumerWidget {
-  const OnboardingScreen({super.key});
+  const OnboardingScreen({super.key, this.onSelesai});
+
+  final VoidCallback? onSelesai;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -17,23 +23,20 @@ class OnboardingScreen extends ConsumerWidget {
 
     final slides = [
       OnboardingSlide(
-        title: 'Selamat Datang',
-        description:
-            'Rencanakan jadwal belajarmu dengan mudah dan terstruktur.',
+        title: l10n('Welcome'),
+        description: l10n('OnboardingDeskripsi1'),
         icon: Icons.calendar_today,
         color: ColorTokens.moonstone,
       ),
       OnboardingSlide(
-        title: 'AI Study Planner',
-        description:
-            'Dapatkan rekomendasi waktu belajar yang disesuaikan kebutuhanmu.',
+        title: l10n('Aplikasi'),
+        description: l10n('OnboardingDeskripsi2'),
         icon: Icons.smart_toy,
         color: ColorTokens.moonstoneTint,
       ),
       OnboardingSlide(
-        title: 'Mulai Belajar',
-        description:
-            'Siapkan rencana belajarmu dan raih prestasi akademik yang lebih baik.',
+        title: l10n('GetStarted'),
+        description: l10n('OnboardingDeskripsi3'),
         icon: Icons.play_arrow,
         color: ColorTokens.vanilla,
       ),
@@ -74,13 +77,14 @@ class OnboardingScreen extends ConsumerWidget {
                 // Tombol lanjut
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 32),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 48,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 48),
                     child: ElevatedButton.icon(
                       onPressed: () {
                         if (state.currentPage == slides.length - 1) {
-                          // TODO: simpan ke preferences dan arahkan ke auth/home
+                          // Suntikan routing: tandai selesai lalu menuju beranda.
+                          onSelesai?.call();
+                          context.go(AppRoutes.beranda);
                         } else {
                           notifier.nextPage(slides.length);
                         }
@@ -93,8 +97,8 @@ class OnboardingScreen extends ConsumerWidget {
                       ),
                       label: Text(
                         state.currentPage == slides.length - 1
-                            ? 'Mulai'
-                            : 'Lanjut',
+                            ? l10n('GetStarted')
+                            : l10n('Lanjut'),
                         style: const TextStyle(
                           fontFamily: 'Inter',
                           fontSize: 14,

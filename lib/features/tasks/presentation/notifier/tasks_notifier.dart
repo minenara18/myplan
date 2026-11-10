@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 
+import 'package:ai_study_planner/core/clock.dart';
 import 'package:ai_study_planner/core/models/task.dart';
+import 'package:ai_study_planner/core/system_clock.dart';
 import 'package:ai_study_planner/data/repositories/task_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -29,9 +31,10 @@ final class TasksError extends TasksState {
 
 /// Notifier untuk manajemen daftar tugas.
 class TasksNotifier extends ChangeNotifier {
-  TasksNotifier(this._taskRepository);
+  TasksNotifier(this._taskRepository, {required Clock clock}) : _clock = clock;
 
   final TaskRepository _taskRepository;
+  final Clock _clock;
 
   TasksState _state = TasksLoading();
   List<Task> _allTasks = [];
@@ -78,7 +81,7 @@ class TasksNotifier extends ChangeNotifier {
   }
 
   List<Task> _filteredTasks() {
-    final now = DateTime.now();
+    final now = _clock.now();
     return _allTasks.where((task) {
       if (_filter == 'today') {
         final t = task.tenggat;
@@ -133,15 +136,23 @@ class TasksNotifier extends ChangeNotifier {
     await load();
   }
 
+  Future<void> deleteTask(String id) async {
+    await _taskRepository.deleteTask(id);
+    await load();
+  }
+
   List<Task> get completedTasks =>
       _allTasks.where((t) => t.status == TaskStatus.selesai).toList();
   List<Task> get pendingTasks =>
       _allTasks.where((t) => t.status != TaskStatus.selesai).toList();
 }
 
-/// Provider TasksNotifier.
-final tasksNotifierProvider =
-    ChangeNotifierProvider<TasksNotifier>((ref) {
+/// Provider TasksNotifier; memuat data saat pertama dibaca sehingga
+/// layar tidak pernah berdiam di state Loading.
+final tasksNotifierProvider = ChangeNotifierProvider<TasksNotifier>((ref) {
   final repo = ref.watch(taskRepositoryProvider);
-  return TasksNotifier(repo);
+  return TasksNotifier(
+    repo,
+    clock: ref.watch(clockProvider),
+  )..load();
 });

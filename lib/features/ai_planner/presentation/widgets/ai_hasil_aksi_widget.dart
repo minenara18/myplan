@@ -62,7 +62,7 @@ class AiHasilAksiWidget extends StatelessWidget {
                         height: 22,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.white,
+                          color: ColorTokens.textPrimary,
                         ),
                       )
                     : const Text(
@@ -70,7 +70,7 @@ class AiHasilAksiWidget extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          color: ColorTokens.textPrimary,
                         ),
                       ),
               ),

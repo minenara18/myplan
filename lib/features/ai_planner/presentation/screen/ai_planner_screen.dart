@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import 'package:ai_study_planner/core/models/ai_plan_block.dart';
 import 'package:ai_study_planner/core/models/ai_plan_result.dart';
+import 'package:ai_study_planner/l10n/app_localizations.dart';
+import 'package:ai_study_planner/theme/components/glass_card.dart';
 import 'package:ai_study_planner/features/ai_planner/presentation/notifier/ai_planner_notifier.dart';
 import 'package:ai_study_planner/features/ai_planner/presentation/widgets/ai_blok_kartu_widget.dart';
 import 'package:ai_study_planner/features/ai_planner/presentation/widgets/ai_hasil_aksi_widget.dart';
@@ -33,7 +35,8 @@ class _AiPlannerScreenState extends ConsumerState<AiPlannerScreen> {
     super.dispose();
   }
 
-  AiPlannerNotifier get _notifier => ref.read(aiPlannerNotifierProvider.notifier);
+  AiPlannerNotifier get _notifier =>
+      ref.read(aiPlannerNotifierProvider.notifier);
 
   void _susun({String? catatan}) {
     _notifier.susun(catatan: catatan?.trim());
@@ -44,11 +47,12 @@ class _AiPlannerScreenState extends ConsumerState<AiPlannerScreen> {
     ref.listen<AiPlannerState>(
       aiPlannerNotifierProvider.select((notifier) => notifier.state),
       (sebelumna, sekarang) {
-        if (sekarang is AiPlannerTersimpan && sebelumna is! AiPlannerTersimpan) {
+        if (sekarang is AiPlannerTersimpan &&
+            sebelumna is! AiPlannerTersimpan) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Rencana diterapkan ke kalender'),
-              duration: Duration(seconds: 2),
+            SnackBar(
+              content: Text(l10n('RencanaDiterapkan')),
+              duration: const Duration(seconds: 2),
             ),
           );
           context.go(AppRoutes.kalender);
@@ -64,7 +68,7 @@ class _AiPlannerScreenState extends ConsumerState<AiPlannerScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           child: Column(
             children: [
-              _header,
+              const _PlannerHeader(),
               const SizedBox(height: 12),
               Expanded(child: _isi(state)),
               const SizedBox(height: 12),
@@ -80,36 +84,8 @@ class _AiPlannerScreenState extends ConsumerState<AiPlannerScreen> {
     );
   }
 
-  Widget get _header {
-    return const Row(
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Rencana AI',
-              style: TextStyle(
-                fontFamily: AppTheme.dmSerifDisplay,
-                fontSize: AppTheme.spacing32,
-                color: ColorTokens.textPrimary,
-              ),
-            ),
-            SizedBox(height: 4),
-            Text(
-              'Susun slot belajar otomatis',
-              style: TextStyle(
-                fontFamily: AppTheme.inter,
-                fontSize: 14,
-                color: ColorTokens.textSecondary,
-              ),
-            ),
-          ],
-        ),
-        Spacer(),
-      ],
-    );
-  }
-
+  /// Header layar: judul serif + keterangan yang bisa membungkus
+  /// tanpa overflow pada skala teks besar, diurus widget `_PlannerHeader`.
   Widget _isi(AiPlannerState state) {
     return switch (state) {
       AiPlannerLoading() => const SingleChildScrollView(
@@ -118,8 +94,7 @@ class _AiPlannerScreenState extends ConsumerState<AiPlannerScreen> {
       AiPlannerError() => ErrorRetryCard(
           message: state.failure.message,
           icon: Icons.smart_toy_outlined,
-          onRetry:
-              state.bisaCobaLagi ? _notifier.cobaUlang : _notifier.reset,
+          onRetry: state.bisaCobaLagi ? _notifier.cobaUlang : _notifier.reset,
         ),
       AiPlannerReady() => _bisaHasil(state),
       AiPlannerIdle() => SingleChildScrollView(
@@ -148,7 +123,7 @@ class _AiPlannerScreenState extends ConsumerState<AiPlannerScreen> {
 
   Widget _tombolAksiCepat() {
     return Semantics(
-      label: 'Susun jadwal minggu ini',
+      label: l10n('SusunJadwalMingguIni'),
       button: true,
       child: SizedBox(
         height: 48,
@@ -156,17 +131,17 @@ class _AiPlannerScreenState extends ConsumerState<AiPlannerScreen> {
           onPressed: () => _susun(catatan: _kontrolTeks.text),
           style: FilledButton.styleFrom(
             backgroundColor: ColorTokens.moonstone,
+            foregroundColor: ColorTokens.textPrimary,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppTheme.radiusLg),
             ),
           ),
-          icon: const Icon(Icons.auto_awesome, color: Colors.white),
-          label: const Text(
-            'Susun jadwal minggu ini',
-            style: TextStyle(
+          icon: const Icon(Icons.auto_awesome),
+          label: Text(
+            l10n('SusunJadwalMingguIni'),
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Colors.white,
             ),
           ),
         ),
@@ -188,36 +163,52 @@ class _AiPlannerScreenState extends ConsumerState<AiPlannerScreen> {
       );
     }
 
-    return ListView(
-      children: [
-        AiMasukanRingkasanWidget(
-          mulai: state.hasil.rentangMulai,
-          sampai: state.hasil.rentangSampai,
-          catatan: state.catatan,
-          onEdit: _bukaSheetEdit,
-        ),
-        const SizedBox(height: 8),
-        if (state.hasil.sumber == AiPlanSumber.fallback)
-          const Padding(
-            padding: EdgeInsets.only(bottom: 8),
+    return ListView.builder(
+      padding: const EdgeInsets.only(bottom: 16),
+      itemCount: state.hasil.sesi.length +
+          (state.hasil.sumber == AiPlanSumber.fallback ? 3 : 2),
+      itemBuilder: (context, index) {
+        // 0: ringkasan masukan; 1: catatan fallback (opsional) atau blok pertama.
+        if (index == 0) {
+          // Varian standard: TANPA BackdropFilter di dalam item ListView
+          // yang bisa digulir (aturan performa AGENTS.md).
+          return AiMasukanRingkasanWidget(
+            mulai: state.hasil.rentangMulai,
+            sampai: state.hasil.rentangSampai,
+            catatan: state.catatan,
+            onEdit: _bukaSheetEdit,
+            variant: GlassCardVariant.standard,
+          );
+        }
+        if (state.hasil.sumber == AiPlanSumber.fallback && index == 1) {
+          return Padding(
+            padding: const EdgeInsets.only(top: 8, bottom: 8),
             child: Text(
-              'AI tidak merespons — pakai penjadwalan fallback dasar.',
-              style: TextStyle(
+              l10n('FallbackAktif'),
+              style: const TextStyle(
                 fontFamily: AppTheme.inter,
                 fontSize: 12,
                 fontStyle: FontStyle.italic,
                 color: ColorTokens.textSecondary,
               ),
             ),
+          );
+        }
+        final awalBlok = state.hasil.sumber == AiPlanSumber.fallback ? 2 : 1;
+        final akhirBlok = awalBlok + state.hasil.sesi.length;
+        if (index < akhirBlok) {
+          final blok = state.hasil.sesi[index - awalBlok];
+          return _kartuBlok(blok, state);
+        }
+        return Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: AiHasilAksiWidget(
+            menyimpan: state is AiPlannerMenyimpan,
+            padaTerapkan: _notifier.terapkan,
+            padaUlang: () => _susun(),
           ),
-        for (final blok in state.hasil.sesi)
-          _kartuBlok(blok, state),
-        AiHasilAksiWidget(
-          menyimpan: state is AiPlannerMenyimpan,
-          padaTerapkan: _notifier.terapkan,
-          padaUlang: () => _susun(),
-        ),
-      ],
+        );
+      },
     );
   }
 
@@ -238,7 +229,8 @@ class _AiPlannerScreenState extends ConsumerState<AiPlannerScreen> {
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppTheme.radiusLg)),
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(AppTheme.radiusLg)),
       ),
       builder: (_) => AiSheetEditMasukan(
         mulaiAwal: defaultMasukan.mulai,
@@ -251,8 +243,10 @@ class _AiPlannerScreenState extends ConsumerState<AiPlannerScreen> {
     if (hasil is (DateTime, DateTime, int, int)) {
       final (hariMulai, hariSampai, jamMulai, jamSelesai) = hasil;
       await _notifier.susun(
-        mulai: DateTime(hariMulai.year, hariMulai.month, hariMulai.day, jamMulai),
-        sampai: DateTime(hariSampai.year, hariSampai.month, hariSampai.day, jamSelesai),
+        mulai:
+            DateTime(hariMulai.year, hariMulai.month, hariMulai.day, jamMulai),
+        sampai: DateTime(
+            hariSampai.year, hariSampai.month, hariSampai.day, jamSelesai),
         catatan: _kontrolTeks.text,
       );
     }
@@ -289,5 +283,38 @@ class _AiPlannerScreenState extends ConsumerState<AiPlannerScreen> {
     if (selesai.isAfter(mulai)) {
       _notifier.perbaruiBlok(blok, mulai, selesai);
     }
+  }
+}
+
+/// Header layar: judul serif dan keterangan.
+/// Tanpa Row/Spacer: teks membungkus di lebar konten sehingga aman
+/// pada skala teks besar (mis. 2.0).
+class _PlannerHeader extends StatelessWidget {
+  const _PlannerHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n('StudyPlan'),
+          style: const TextStyle(
+            fontFamily: AppTheme.dmSerifDisplay,
+            fontSize: AppTheme.spacing32,
+            color: ColorTokens.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          l10n('SusunSlotOtomatis'),
+          style: const TextStyle(
+            fontFamily: AppTheme.inter,
+            fontSize: 14,
+            color: ColorTokens.textSecondary,
+          ),
+        ),
+      ],
+    );
   }
 }

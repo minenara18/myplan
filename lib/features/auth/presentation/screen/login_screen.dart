@@ -1,5 +1,6 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:ai_study_planner/l10n/app_localizations.dart';
 import 'package:ai_study_planner/theme/components/ambient_background.dart';
@@ -8,18 +9,42 @@ import 'package:ai_study_planner/theme/color_tokens.dart';
 import 'package:ai_study_planner/features/auth/presentation/notifier/auth_notifier.dart';
 import 'package:ai_study_planner/features/auth/presentation/widgets/auth_form_field.dart';
 import 'package:ai_study_planner/features/auth/presentation/widgets/google_button.dart';
+import 'package:ai_study_planner/routing/routes.dart';
 
 /// Layar login sebagai GlassCard di tengah dengan lingkaran blur di belakangnya.
-class LoginScreen extends ConsumerWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends ConsumerState<LoginScreen> {
+  late final TextEditingController _emailController;
+  late final TextEditingController _passwordController;
+
+  @override
+  void initState() {
+    super.initState();
+    _emailController = TextEditingController();
+    _passwordController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  void _submit(AuthNotifier notifier) {
+    notifier.login(_emailController.text, _passwordController.text);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final notifier = ref.read(authNotifierProvider.notifier);
     final authState = ref.watch(authNotifierProvider);
-
-    final emailController = TextEditingController();
-    final passwordController = TextEditingController();
 
     return Scaffold(
       body: Stack(
@@ -38,7 +63,12 @@ class LoginScreen extends ConsumerWidget {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Icon(Icons.login, size: 48, color: ColorTokens.moonstone),
+                        const Icon(
+                          Icons.login,
+                          size: 48,
+                          color: ColorTokens.moonstone,
+                          semanticLabel: 'Masuk',
+                        ),
                         const SizedBox(height: 24),
                         Text(
                           AppLocalizations.messages['Login'] ?? 'Masuk',
@@ -51,7 +81,8 @@ class LoginScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          AppLocalizations.messages['Welcome'] ?? 'Selamat Datang',
+                          AppLocalizations.messages['Welcome'] ??
+                              'Selamat Datang',
                           style: TextStyle(
                             fontFamily: 'Inter',
                             fontSize: 14,
@@ -61,29 +92,29 @@ class LoginScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 32),
                         AuthFormField(
-                          controller: emailController,
-                          label: 'Email',
+                          controller: _emailController,
+                          label: l10n('Email'),
                           icon: Icons.email,
                           keyboardType: TextInputType.emailAddress,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Email tidak boleh kosong.';
+                              return l10n('EmailKosong');
                             }
                             if (!value.contains('@')) {
-                              return 'Masukkan email yang valid.';
+                              return l10n('EmailTidakValid');
                             }
                             return null;
                           },
                         ),
                         const SizedBox(height: 16),
                         AuthFormField(
-                          controller: passwordController,
-                          label: 'Sandi',
+                          controller: _passwordController,
+                          label: l10n('Sandi'),
                           icon: Icons.lock,
                           isPassword: true,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Sandi tidak boleh kosong.';
+                              return l10n('SandiKosong');
                             }
                             return null;
                           },
@@ -93,27 +124,25 @@ class LoginScreen extends ConsumerWidget {
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFBA1A1A).withValues(alpha: 0.1),
+                              color: ColorTokens.error.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
                               authState.errorMessage!,
                               style: const TextStyle(
-                                color: Color(0xFFBA1A1A),
-                                fontSize: 12,
+                                color: ColorTokens.error,
+                                fontSize: 13,
                               ),
                             ),
                           ),
                         const SizedBox(height: 24),
-                        SizedBox(
-                          height: 48,
+                        // Tombol pakai batas minimum agar bisa membesar di skala teks 2.0.
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(minHeight: 48),
                           child: ElevatedButton(
                             onPressed: authState.isLoading
                                 ? null
-                                : () => notifier.login(
-                                      emailController.text,
-                                      passwordController.text,
-                                    ),
+                                : () => _submit(notifier),
                             child: authState.isLoading
                                 ? const SizedBox(
                                     width: 20,
@@ -122,7 +151,7 @@ class LoginScreen extends ConsumerWidget {
                                       strokeWidth: 2,
                                     ),
                                   )
-                                : const Text('Masuk'),
+                                : Text(l10n('Login')),
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -131,10 +160,8 @@ class LoginScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 16),
                         TextButton(
-                          onPressed: () {
-                            // TODO: navigate to register
-                          },
-                          child: const Text('Belum punya akun? Daftar'),
+                          onPressed: () => context.go(AppRoutes.register),
+                          child: Text(l10n('BelumPunyaAkun')),
                         ),
                       ],
                     ),

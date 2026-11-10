@@ -1,7 +1,10 @@
 import 'package:flutter/foundation.dart';
 
+import 'package:ai_study_planner/core/clock.dart';
 import 'package:ai_study_planner/core/models/study_session.dart';
+import 'package:ai_study_planner/core/system_clock.dart';
 import 'package:ai_study_planner/data/repositories/session_repository.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// State untuk CalendarNotifier.
 sealed class CalendarState {}
@@ -24,13 +27,18 @@ final class CalendarError extends CalendarState {
 
 /// Notifier untuk kalender belajar.
 class CalendarNotifier extends ChangeNotifier {
-  CalendarNotifier(this._sessionRepository);
+  CalendarNotifier(this._sessionRepository, {required Clock clock})
+      : _selectedDay = _tanggal(clock.now());
 
   final SessionRepository _sessionRepository;
 
   CalendarState _state = CalendarLoading();
-  DateTime _selectedDay = DateTime.now();
+  DateTime _selectedDay;
   Map<DateTime, List<StudySession>> _allSessions = {};
+
+  /// Awal hari lewat Clock yang disuntik, bukan DateTime.now().
+  static DateTime _tanggal(DateTime waktu) =>
+      DateTime(waktu.year, waktu.month, waktu.day);
 
   CalendarState get state => _state;
   DateTime get selectedDay => _selectedDay;
@@ -44,11 +52,13 @@ class CalendarNotifier extends ChangeNotifier {
       _allSessions = {};
       await for (final sessions in _sessionRepository.watchSessions().take(1)) {
         for (final s in sessions) {
-          final day = DateTime(s.mulai.year, s.mulai.month, s.mulai.day);
+          final day = _tanggal(s.mulai);
           _allSessions.putIfAbsent(day, () => []).add(s);
         }
       }
-      _state = _allSessions.isEmpty ? CalendarEmpty() : CalendarContent(_allSessions);
+      _state = _allSessions.isEmpty
+          ? CalendarEmpty()
+          : CalendarContent(_allSessions);
     } catch (e) {
       _state = CalendarError(e.toString());
     }
@@ -56,8 +66,14 @@ class CalendarNotifier extends ChangeNotifier {
   }
 
   void selectDay(DateTime day) {
-    _selectedDay = DateTime(day.year, day.month, day.day);
+    _selectedDay = _tanggal(day);
     notifyListeners();
+  }
+
+  /// Menyimpan sesi baru lalu memuat ulang data kalender.
+  Future<void> tambahSesi(StudySession session) async {
+    await _sessionRepository.saveSession(session);
+    await load();
   }
 
   void previousWeek() {
@@ -71,7 +87,17 @@ class CalendarNotifier extends ChangeNotifier {
   }
 
   List<DateTime> get weekDays {
-    final start = _selectedDay.subtract(Duration(days: _selectedDay.weekday - 1));
+    final start =
+        _selectedDay.subtract(Duration(days: _selectedDay.weekday - 1));
     return List.generate(7, (i) => start.add(Duration(days: i)));
   }
 }
+
+/// Provider CalendarNotifier; memuat sesi saat pertama dibaca.
+final calendarNotifierProvider =
+    ChangeNotifierProvider<CalendarNotifier>((ref) {
+  return CalendarNotifier(
+    ref.watch(sessionRepositoryProvider),
+    clock: ref.watch(clockProvider),
+  )..load();
+});

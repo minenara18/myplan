@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 import 'package:ai_study_planner/core/timer_state_machine.dart';
 import 'package:ai_study_planner/theme/color_tokens.dart';
@@ -44,6 +44,7 @@ class TimerControlsWidget extends StatelessWidget {
               color: ColorTokens.moonstone,
               size: 28,
             ),
+            tooltip: isRunning ? 'Jeda' : (isPaused ? 'Lanjutkan' : 'Mulai'),
             onPressed: isRunning ? onPause : (isPaused ? onResume : onStart),
           ),
         ),
@@ -57,7 +58,9 @@ class TimerControlsWidget extends StatelessWidget {
             shape: BoxShape.circle,
           ),
           child: IconButton(
-            icon: const Icon(Icons.skip_next, color: ColorTokens.moonstone, size: 28),
+            icon: const Icon(Icons.skip_next,
+                color: ColorTokens.moonstone, size: 28),
+            tooltip: 'Lewati sesi',
             onPressed: onSkip,
           ),
         ),
@@ -67,11 +70,13 @@ class TimerControlsWidget extends StatelessWidget {
           width: 56,
           height: 56,
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.8),
+            color: ColorTokens.white.withValues(alpha: 0.8),
             shape: BoxShape.circle,
           ),
           child: IconButton(
-            icon: const Icon(Icons.refresh, color: ColorTokens.moonstone, size: 28),
+            icon: const Icon(Icons.refresh,
+                color: ColorTokens.moonstone, size: 28),
+            tooltip: 'Atur ulang',
             onPressed: onReset,
           ),
         ),

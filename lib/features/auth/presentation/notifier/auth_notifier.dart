@@ -60,13 +60,6 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 }
 
-/// Provider AuthRepository — melempar UnimplementedError sampai di-override di bootstrap.
-final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  throw UnimplementedError(
-    'AuthRepository belum di-override di bootstrap. '
-    'Gunakan FakeAuthRepository atau RemoteAuthRepository.',
-  );
-});
-
 /// Provider AuthNotifier.
-final authNotifierProvider = NotifierProvider<AuthNotifier, AuthState>(AuthNotifier.new);
+final authNotifierProvider =
+    NotifierProvider<AuthNotifier, AuthState>(AuthNotifier.new);

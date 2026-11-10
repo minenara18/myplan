@@ -50,7 +50,7 @@ class AiBlokKartuWidget extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.7),
+        color: ColorTokens.white.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(AppTheme.radiusLg),
         border: Border.all(color: ColorTokens.moonstone.withValues(alpha: 0.2)),
         boxShadow: [
@@ -88,8 +88,7 @@ class AiBlokKartuWidget extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         color: ColorTokens.textPrimary,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      // Judul dibungkus penuh, tanpa ellipsis, aman skala 2.0.
                     ),
                     const SizedBox(height: 2),
                     Text(
@@ -99,8 +98,6 @@ class AiBlokKartuWidget extends StatelessWidget {
                         fontSize: 12,
                         color: ColorTokens.textSecondary,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
