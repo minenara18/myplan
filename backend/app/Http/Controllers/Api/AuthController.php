@@ -27,7 +27,9 @@ final class AuthController extends Controller
             ],
         ]);
 
-        $token = $user->createToken('mobile')->plainTextToken;
+        // Masa berlaku 60 hari: pemakaian aplikasi memperpanjang lewat
+        // RenewSessionToken; lewat 60 hari tanpa dibuka, wajib login lagi.
+        $token = $user->createToken('mobile', ['*'], now()->addDays(60))->plainTextToken;
 
         return response()->json([
             'data' => [
@@ -48,7 +50,9 @@ final class AuthController extends Controller
             ]);
         }
 
-        $token = $user->createToken('mobile')->plainTextToken;
+        // Masa berlaku 60 hari; tiap request terautentikasi memperpanjang
+        // lewat RenewSessionToken, lewat 60 hari idle wajib login lagi.
+        $token = $user->createToken('mobile', ['*'], now()->addDays(60))->plainTextToken;
 
         return response()->json([
             'data' => [

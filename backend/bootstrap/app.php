@@ -8,6 +8,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Validation\ValidationException;
 use App\Exceptions\AiException;
+use Laravel\Sanctum\PersonalAccessToken;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -43,6 +44,21 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (AuthenticationException $exception, $request) {
             if (! $request->is('api/*')) {
                 return null;
+            }
+
+            // Bedakan sesi kedaluwarsa dari belum masuk: bila bearer token
+            // dikenali di DB tapi expires_at sudah lewat, hasilnya
+            // session_expired agar aplikasi menampilkan banner berbeda dan
+            // bisa mengisi surel dari sesi terakhir.
+            $bearer = $request->bearerToken();
+            $token = $bearer === null ? null : PersonalAccessToken::findToken($bearer);
+
+            if ($token && $token->expires_at && $token->expires_at->isPast()) {
+                return response()->json([
+                    'message' => 'Sesi kamu sudah berakhir. Silakan masuk lagi.',
+                    'errors' => [],
+                    'code' => 'session_expired',
+                ], 401);
             }
 
             return response()->json([

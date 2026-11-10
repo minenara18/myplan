@@ -9,13 +9,16 @@ use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\StatsController;
 use App\Http\Controllers\Api\StudySessionController;
 use App\Http\Controllers\Api\TaskController;
+use App\Http\Middleware\RenewSessionToken;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/auth/register', [AuthController::class, 'register'])
     ->name('auth.register');
 Route::post('/auth/login', [AuthController::class, 'login'])->name('auth.login');
 
-Route::middleware('auth:sanctum')->group(function () {
+// RenewSessionToken setelah auth:sanctum memuat token:
+// tiap request terautentikasi memperpanjang sesi hingga 60 hari lagi.
+Route::middleware(['auth:sanctum', RenewSessionToken::class])->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout'])->name('auth.logout');
     Route::get('/me', [AuthController::class, 'me'])->name('auth.me');
 
