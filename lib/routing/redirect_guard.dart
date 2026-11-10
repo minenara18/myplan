@@ -1,32 +1,38 @@
-import 'package:ai_study_planner/routing/auth_provider.dart';
+import 'package:ai_study_planner/core/session_policy.dart';
 import 'package:ai_study_planner/routing/routes.dart';
 
+const _kAuthRoute = [AppRoutes.onboarding, AppRoutes.login, AppRoutes.register];
+const _kLoginRoute = [AppRoutes.login, AppRoutes.register];
+
 /// Redirect guard sebagai fungsi murni.
-/// [currentRoute] adalah lokasi saat ini dari GoRouterState.matchedLocation.
-/// Membaca status onboarding dan login dari [auth].
-/// Mengembalikan path tujuan jika perlu redirect, atau null jika boleh lanjut.
+/// [currentRoute] adalah lokasi saat ini (GoRouterState.matchedLocation,
+/// tanpa query). Keputusan sesi dibaca dari [SessionKeeper].
+///
+/// Aturan:
+/// - /splash tidak pernah di-redirect: splash yang memilih tujuan.
+/// - [decision] null (splash masih berjalan) memaksa kembali ke /splash,
+///   kecuali [splashSudahMenuju] — splash sedang menuju hasil keputusannya.
+/// - [NeedsOnboarding] hanya mengizinkan /onboarding, /login, /register.
+/// - [NeedsLogin] hanya mengizinkan /login dan /register.
+/// - [Authenticated] memaksa /onboarding, /login, /register ke /beranda.
 String? redirectGuard({
   required String currentRoute,
-  required AuthStatus auth,
+  required SessionDecision? decision,
+  required bool splashSudahMenuju,
 }) {
-  final loggingIn = currentRoute == AppRoutes.login;
-  final registering = currentRoute == AppRoutes.register;
-  final onboarding = currentRoute == AppRoutes.onboarding;
+  if (currentRoute == AppRoutes.splash) return null;
 
-  // Belum login -> arahkan ke /login, kecuali sudah di halaman login/register/onboarding
-  if (auth.needsLogin && !loggingIn && !registering && !onboarding) {
-    return AppRoutes.login;
+  if (decision == null) {
+    return splashSudahMenuju ? null : AppRoutes.splash;
   }
 
-  // Sudah login tapi belum onboarding -> arahkan ke /onboarding, kecuali sudah di onboarding
-  if (auth.needsOnboarding && !onboarding) {
-    return AppRoutes.onboarding;
+  switch (decision) {
+    case NeedsOnboarding():
+      return _kAuthRoute.contains(currentRoute) ? null : AppRoutes.onboarding;
+    case NeedsLogin(:final reason):
+      if (_kLoginRoute.contains(currentRoute)) return null;
+      return AppRoutes.loginDenganAlasan(reason);
+    case Authenticated():
+      return _kAuthRoute.contains(currentRoute) ? AppRoutes.beranda : null;
   }
-
-  // Sudah login dan sudah onboarding, tapi mencoba buka login/register -> arahkan ke beranda
-  if (auth.isLoggedIn && auth.isOnboarded && (loggingIn || registering)) {
-    return AppRoutes.beranda;
-  }
-
-  return null;
 }

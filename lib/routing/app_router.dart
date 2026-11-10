@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:ai_study_planner/core/session_policy.dart';
 import 'package:ai_study_planner/features/ai_planner/presentation/screen/ai_planner_screen.dart';
 import 'package:ai_study_planner/features/ai_planner/presentation/screen/ringkas_materi_screen.dart';
 import 'package:ai_study_planner/features/auth/presentation/screen/login_screen.dart';
@@ -13,29 +14,39 @@ import 'package:ai_study_planner/features/home/presentation/screen/home_screen.d
 import 'package:ai_study_planner/features/onboarding/presentation/screen/onboarding_screen.dart';
 import 'package:ai_study_planner/features/profile/presentation/screen/profile_screen.dart';
 import 'package:ai_study_planner/features/progress/presentation/screen/progress_screen.dart';
+import 'package:ai_study_planner/features/splash/presentation/screen/splash_screen.dart';
 import 'package:ai_study_planner/features/tasks/presentation/screen/add_edit_task_screen.dart';
 import 'package:ai_study_planner/features/tasks/presentation/screen/task_detail_screen.dart';
 import 'package:ai_study_planner/features/tasks/presentation/screen/tasks_screen.dart';
-import 'package:ai_study_planner/routing/auth_provider.dart';
 import 'package:ai_study_planner/routing/redirect_guard.dart';
 import 'package:ai_study_planner/routing/routes.dart';
 import 'package:ai_study_planner/routing/screens/not_found_screen.dart';
+import 'package:ai_study_planner/routing/session_keeper.dart';
+import 'package:ai_study_planner/services/session_store.dart';
 import 'package:ai_study_planner/theme/components/glass_bottom_bar.dart';
 
-/// Provider GoRouter: dibangun ulang saat status auth berubah sehingga
-/// redirect guard selalu membaca status terkini (fungsi murni).
+/// Provider GoRouter: dibangun ulang lewat SessionKeeper sebagai
+/// refreshListenable sehingga redirect guard selalu membaca keputusan
+/// sesi terkini (fungsi murni).
 /// Rute dideklarasikan di sini agar glue lintas-fitur (menandai onboarding
-/// selesai melalui AuthNotifier) hidup di lapisan routing, bukan di fitur.
+/// selesai, logout) hidup di lapisan routing, bukan di fitur.
 final goRouterProvider = Provider<GoRouter>((ref) {
-  final status = ref.watch(authStatusProvider);
+  final keeper = ref.watch(sessionKeeperProvider);
 
   return GoRouter(
+    initialLocation: AppRoutes.splash,
+    refreshListenable: keeper,
     redirect: (context, state) => redirectGuard(
       currentRoute: state.matchedLocation,
-      auth: status,
+      decision: keeper.decision,
+      splashSudahMenuju: keeper.splashSelesai,
     ),
     errorBuilder: (context, state) => const NotFoundScreen(),
     routes: [
+      GoRoute(
+        path: AppRoutes.splash,
+        builder: (context, state) => const SplashScreen(),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return ScaffoldWithNavBar(navigationShell: navigationShell);
@@ -80,8 +91,13 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                 builder: (context, state) => ProfileScreen(
                   // Glue lintas fitur milik routing: fitur profile
                   // tidak mengimpor fitur auth.
-                  onLogout: () =>
-                      ref.read(authNotifierProvider.notifier).logout(),
+                  onLogout: () async {
+                    await ref.read(authNotifierProvider.notifier).logout();
+                    await ref.read(sessionStoreProvider).hapusSesi();
+                    ref
+                        .read(sessionKeeperProvider)
+                        .tetapkan(const NeedsLogin(LoginReason.pertamaKali));
+                  },
                 ),
               ),
             ],
@@ -92,17 +108,23 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.onboarding,
         builder: (context, state) => OnboardingScreen(
           // Glue lintas fitur milik routing: fitur onboarding tidak
-          // mengimpor fitur auth.
+          // mengimpor fitur auth. Setelah Mulai, keputusan sesi berubah
+          // menjadi "harus login pertama kali".
           onSelesai: () {
             ref
                 .read(authNotifierProvider.notifier)
                 .setOnboardingCompleted(true);
+            ref
+                .read(sessionKeeperProvider)
+                .tetapkan(const NeedsLogin(LoginReason.pertamaKali));
           },
         ),
       ),
       GoRoute(
         path: AppRoutes.login,
-        builder: (context, state) => const LoginScreen(),
+        builder: (context, state) => LoginScreen(
+          kedaluwarsa: AppRoutes.loginKedaluwarsa(state.uri),
+        ),
       ),
       GoRoute(
         path: AppRoutes.register,
